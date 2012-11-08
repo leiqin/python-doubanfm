@@ -28,7 +28,6 @@ class Douban(object):
     def unlike(self, song):
         pass
         
-
 class Song(object):
 
     def __init__(self, data = {}):
