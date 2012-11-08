@@ -7,7 +7,7 @@ g = glob.iglob("/home/leiqin/Music/*.mp3")
             
 class Douban(object):
 
-    cookiefile = "~/.cache/python-doubanfm/cookie"
+    cookiefile = "~/.cache/python-doubanfm/cookie.txt"
 
     def __init__(self):
         pass
