@@ -3,54 +3,67 @@
 
 import os
 import os.path
+import codecs
 
-import player
+from player import Player
 import util
 
 
-pipefile = os.path.expanduser("~/.cache/pythen-doubanfm/pipe")
+cmdpipe = os.path.expanduser("~/.cache/python-doubanfm/cmdpipe")
+infopipe = os.path.expanduser("~/.cache/python-doubanfm/infopipe")
 
 def start():
-    p = player.Player()
-    p.play()
-    p.start()
 
-    mkpipe(pipefile)
+    player = Player()
+    player.play()
+    player.start()
 
-    f = open(pipefile, 'r')
+    mkpipe(cmdpipe)
+    mkpipe(infopipe)
+
+    cmdreader = open(cmdpipe, 'r')
     while True:
-        cmd = f.read(1)
+        cmd = cmdreader.read(1)
         if not cmd:
-            f.close()
-            f = open(pipefile, 'r')
+            cmdreader.close()
+            cmdreader = open(cmdpipe, 'r')
         elif cmd == 'n':
-            p.next()
+            player.next()
         elif cmd == 'p':
-            if not p.playing:
-                p.play()
+            if not player.playing:
+                player.play()
         elif cmd == 'P':
-            if p.playing:
-                p.pause()
+            if player.playing:
+                player.pause()
         elif cmd == 'G':
-            if p.playing:
-                p.pause()
+            if player.playing:
+                player.pause()
             else:
-                p.play()
+                player.play()
         elif cmd == 'l':
-            if not p.song.like:
-                p.like()
+            if not player.song.like:
+                player.like()
         elif cmd == 'u':
-            if p.song.like:
-                p.unlike()
+            if player.song.like:
+                player.unlike()
         elif cmd == 'L':
-            if p.song.like:
-                p.unlike()
+            if player.song.like:
+                player.unlike()
             else:
-                p.like()
+                player.like()
         elif cmd == 'x':
-            p.exit()
-            os.remove(pipefile)
+            player.exit()
+            os.remove(cmdpipe)
+            os.remove(infopipe)
             return
+        elif cmd == 'i':
+            song = player.song
+            with codecs.open(infopipe, 'w', 'utf-8') as infowriter:
+                print >>infowriter, 'Title    : %s' % song.title
+                print >>infowriter, 'Artist   : %s' % song.artist
+                print >>infowriter, 'Like     : %s' % song.like
+                print >>infowriter, 'Album    : %s' % song.album
+                print >>infowriter, 'Year     : %s' % song.publicTime
 
 def mkpipe(pipefile):
     util.initParent(pipefile)

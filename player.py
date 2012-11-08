@@ -3,10 +3,11 @@
 
 import threading
 import pyglet.app
-import pyglet.media
 import pyglet.clock
 
 import douban
+
+media = None
 
 class Player(threading.Thread):
 
@@ -14,6 +15,16 @@ class Player(threading.Thread):
     song = None
 
     def __init__(self):
+        # 由于 pyglet.media 在导入后即便什么也没做
+        # 也会在退出时出现警告：
+        #
+        # AL lib: ReleaseALC: 1 device not closed
+        #
+        # 虽说好像没什么大问题，但依然很恼人
+        # 只有按需导入了
+        global media
+        if media:
+            from pyglet import media
         threading.Thread.__init__(self)
         self.daemon = True
 

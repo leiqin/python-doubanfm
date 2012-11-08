@@ -3,17 +3,26 @@
 
 import urllib
 import urllib2
+import cookielib
 import json
-            
+import os.path
+
+import cookie
+
 class Douban(object):
 
-    cookiefile = "~/.cache/python-doubanfm/cookie.txt"
+    cookiefile = "~/.cache/python-doubanfm/cookies.txt"
 
     # http://douban.fm/j/mine/playlist?type=e&sid=221320&channel=0&pt=213.4&from=mainsite&r=a2d009faac
     url = 'http://douban.fm/j/mine/playlist'
 
     def __init__(self):
-        self.opener = urllib2.build_opener()
+        self.cookiefile = os.path.expanduser(self.cookiefile)
+        cookiejar = cookie.FirecookieCookieJar(self.cookiefile)
+        if os.path.exists(self.cookiefile) and os.path.isfile(self.cookiefile):
+            cookiejar.load()
+        cookieHandler = urllib2.HTTPCookieProcessor(cookiejar)
+        self.opener = urllib2.build_opener(cookieHandler)
         self.songs = []
 
     def _open(self, type='n', sid=None, channel=0, pt=None):
@@ -34,6 +43,7 @@ class Douban(object):
     def _parse(self, response):
         j = json.load(response)
         self.songs = j['song']
+        self.songs.reverse()
 
     def next(self, song = None):
         if not song:
@@ -62,13 +72,15 @@ class Douban(object):
 
 
     def like(self, song):
-        res = self._open(type='r', sid=result.sid, pt=song.time)
+        res = self._open(type='r', sid=song.sid, pt=song.time)
         self._parse(res)
+        song.like = True
 
     def unlike(self, song):
-        res = self._open(type='u', sid=result.sid, pt=song.time)
+        res = self._open(type='u', sid=song.sid, pt=song.time)
         self._parse(res)
-        
+        song.like = False
+
 class Song(object):
 
     def __init__(self, data = {}):
@@ -76,18 +88,24 @@ class Song(object):
         self.sid = self.data.get('sid')
         self.title = self.data.get('title')
         self.like = self.data.get('like')
+        if self.like:
+            self.like = True
+        else:
+            self.like = False
         self.artist = self.data.get('artist')
         self.url = self.data.get('url')
         self.album = self.data.get('albumtitle')
         self.publicTime = self.data.get('public_time')
         self.picture = self.data.get('picture')
         self.length = self.data.get('length')
+        if self.length:
+            self.length = float(self.length)
         self.time = 0
         self.file = None
 
 
 if __name__ == '__main__':
     douban = Douban()
-    s = douban.next()
-    print s.title, s.sid, s.url
-
+    f = douban.opener.open('http://douban.fm/mine?type=played')
+    r = f.read()
+    print r
