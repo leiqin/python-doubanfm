@@ -5,6 +5,8 @@ import urllib
 import urllib2
 import cookielib
 import json
+import tempfile
+import os
 import os.path
 
 import cookie
@@ -24,6 +26,7 @@ class Douban(object):
         cookieHandler = urllib2.HTTPCookieProcessor(cookiejar)
         self.opener = urllib2.build_opener(cookieHandler)
         self.songs = []
+        self.tempfile = None
 
     def _open(self, type='n', sid=None, channel=0, pt=None):
         params = {}
@@ -65,6 +68,16 @@ class Douban(object):
 
         json = self.songs.pop()
         result = Song(json)
+        if self.tempfile:
+            os.remove(self.tempfile)
+        fd, self.tempfile = tempfile.mkstemp()
+        r = self.opener.open(result.url)
+        data = r.read()
+        r.close()
+        os.write(fd, data)
+        os.close(fd)
+        result.file = self.tempfile
+
         if not self.songs:
             res = self._open(type='p', sid=result.sid, pt=0)
             self._parse(res)
