@@ -34,8 +34,9 @@ class Player(threading.Thread):
         def on_eos():
             if self.song:
                 self.song.time = self.song.length
-            song = self.douban.next(self.song)
-            self.play(song)
+            song = self.douban.next(self.song, False)
+            if song:
+                self.play(song)
 
     # 该方法会阻塞
     def run(self):
