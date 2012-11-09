@@ -11,7 +11,8 @@ import douban
 
 parser = argparse.ArgumentParser(description="CmdLine for http://douban.fm . you can use cookie file export from firefox by Firecookie, put it to %s" % douban.Douban.cookiefile)
 
-parser.add_argument('-s', '--server', action='store_true', help="Start the server")
+parser.add_argument('-s', '--server', action='store_const', const=1, dest='server', help="Start the server")
+parser.add_argument('-U', '--unplay-server', action='store_const', const=2, dest='server', help="Start the server, but not play")
 
 parser.add_argument('-p', '--play', action='store_const', const='p', dest="flag", help="Start play")
 parser.add_argument('-P', '--pause', action='store_const', const='P', dest="flag", help="Pause")
@@ -42,7 +43,10 @@ def writepipe(ch):
 if args.exit:
     writepipe('x')
 elif args.server:
-    listeningfifo.start()
+    if args.server == 1:
+        listeningfifo.start()
+    else:
+        listeningfifo.unplaystart()
 elif args.info:
     if writepipe('i'):
         infopipe = listeningfifo.infopipe

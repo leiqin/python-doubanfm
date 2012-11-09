@@ -11,12 +11,16 @@ import util
 cmdpipe = os.path.expanduser("~/.cache/python-doubanfm/cmdpipe")
 infopipe = os.path.expanduser("~/.cache/python-doubanfm/infopipe")
 
-def start():
+def unplaystart():
+    start(False)
+
+def start(play=True):
 
     # 加快命令行的响应速度
     from player import Player
     player = Player()
-    player.play()
+    if (play):
+        player.play()
     player.start()
 
     mkpipe(cmdpipe)
