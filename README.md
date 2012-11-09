@@ -40,3 +40,5 @@ python 豆瓣FM 命令行客户端
 
 可以用 Firecookie 导出 firefox 的 cookie 到 ~/.cache/python-doubanfm/cookies.txt
 这样就可以用 喜欢/不喜欢 的功能了
+
+改成先下载到本地后，播放一段时间依然 CPU 狂转，还在找原因
