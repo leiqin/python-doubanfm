@@ -43,10 +43,10 @@ if args.exit:
 elif args.server:
     listeningfifo.start()
 elif args.info:
-    writepipe('i')
-    infopipe = listeningfifo.infopipe
-    with open(infopipe, 'r') as p:
-        print p.read()
+    if writepipe('i'):
+        infopipe = listeningfifo.infopipe
+        with open(infopipe, 'r') as p:
+            print p.read()
 elif args.flag:
     writepipe(args.flag)
 else:
