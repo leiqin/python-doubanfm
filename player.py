@@ -62,10 +62,10 @@ class Player(threading.Thread):
     def run(self):
         pyglet.app.run()
 
-    def next(self):
+    def next(self, index=0):
         if self.song:
             self.song.time = self.player.time
-        song = self.douban.next(self.song)
+        song = self.douban.next(self.song, index=index)
         self.play(song)
 
     def pause(self):

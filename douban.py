@@ -52,7 +52,7 @@ class Douban(object):
         songs = map(Song , j['song'])
         self.songs = songs
 
-    def next(self, song = None, blocking = True):
+    def next(self, song=None, blocking=True, index=0):
         if not self.lock.acquire(blocking):
             return
         try:
@@ -70,8 +70,13 @@ class Douban(object):
                     self._parse(res)
             else:
                 # hand
-                res = self._open(type='s', sid=song.sid, pt=song.time)
-                self._parse(res)
+                if index <=0 or index > len(self.songs):
+                    res = self._open(type='s', sid=song.sid, pt=song.time)
+                    self._parse(res)
+                else:
+                    while index > 1:
+                        self.songs.pop(0)
+                        index = index - 1
 
             result = self.songs.pop(0)
 

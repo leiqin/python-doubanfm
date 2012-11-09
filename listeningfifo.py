@@ -26,56 +26,68 @@ def start(play=True):
     mkpipe(cmdpipe)
     mkpipe(infopipe)
 
-    cmdreader = open(cmdpipe, 'r')
-    while True:
-        cmd = cmdreader.read(1)
-        if not cmd:
-            cmdreader.close()
-            cmdreader = open(cmdpipe, 'r')
-        elif cmd == 'n':
-            player.next()
-        elif cmd == 'p':
-            if not player.playing:
-                player.play()
-        elif cmd == 'P':
-            if player.playing:
-                player.pause()
-        elif cmd == 'G':
-            if player.playing:
-                player.pause()
-            else:
-                player.play()
-        elif cmd == 'f':
-            if not player.song.like:
-                player.like()
-        elif cmd == 'u':
-            if player.song.like:
-                player.unlike()
-        elif cmd == 'F':
-            if player.song.like:
-                player.unlike()
-            else:
-                player.like()
-        elif cmd == 'x':
-            player.exit()
-            os.remove(cmdpipe)
-            os.remove(infopipe)
-            return
-        elif cmd == 'i':
-            song = player.song
-            with codecs.open(infopipe, 'w', 'utf-8') as infowriter:
-                print >>infowriter, 'Title    : %s' % song.title
-                print >>infowriter, 'Artist   : %s' % song.artist
-                print >>infowriter, 'Like     : %s' % song.like
-                print >>infowriter, 'Album    : %s' % song.album
-                print >>infowriter, 'Year     : %s' % song.publicTime
-        elif cmd == 'l':
-            song = player.song
-            songs = player.douban.songs
-            with codecs.open(infopipe, 'w', 'utf-8') as listwriter:
-                print >>listwriter, '%s <%s>' % (song.title, song.artist)
-                for s in songs:
-                    print >>listwriter, '%s <%s>' % (s.title, s.artist)
+    try:
+        cmdreader = open(cmdpipe, 'r')
+        while True:
+            cmd = cmdreader.read(1)
+            if not cmd:
+                cmdreader.close()
+                cmdreader = open(cmdpipe, 'r')
+            elif cmd == 'n':
+                index = cmdreader.read(1)
+                index = ord(index)
+                player.next(index=index)
+            elif cmd == 'p':
+                if not player.playing:
+                    player.play()
+            elif cmd == 'P':
+                if player.playing:
+                    player.pause()
+            elif cmd == 'G':
+                if player.playing:
+                    player.pause()
+                else:
+                    player.play()
+            elif cmd == 'f':
+                if not player.song.like:
+                    player.like()
+            elif cmd == 'u':
+                if player.song.like:
+                    player.unlike()
+            elif cmd == 'F':
+                if player.song.like:
+                    player.unlike()
+                else:
+                    player.like()
+            elif cmd == 'x':
+                player.exit()
+                clearpipe()
+                return
+            elif cmd == 'i':
+                song = player.song
+                with codecs.open(infopipe, 'w', 'utf-8') as infowriter:
+                    if song:
+                        print >>infowriter, 'Title    : %s' % song.title
+                        print >>infowriter, 'Artist   : %s' % song.artist
+                        print >>infowriter, 'Like     : %s' % song.like
+                        print >>infowriter, 'Album    : %s' % song.album
+                        print >>infowriter, 'Year     : %s' % song.publicTime
+            elif cmd == 'l':
+                song = player.song
+                songs = player.douban.songs
+                with codecs.open(infopipe, 'w', 'utf-8') as listwriter:
+                    if song:
+                        print >>listwriter, '%s <%s>' % (song.title, song.artist)
+                    for s in songs:
+                        print >>listwriter, '%s <%s>' % (s.title, s.artist)
+    finally:
+            clearpipe()
+
+def clearpipe():
+    if os.path.exists(cmdpipe):
+        os.remove(cmdpipe)
+    if os.path.exists(infopipe):
+        os.remove(infopipe)
 
 def mkpipe(pipefile):
     util.initParent(pipefile)
