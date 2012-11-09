@@ -19,11 +19,12 @@ parser.add_argument('-G', '--toggle-pause', action='store_const', const='G', des
 
 parser.add_argument('-n', '--next', action='store_const',const='n',dest="flag", help="Play next song")
 
-parser.add_argument('-l', '--like', action='store_const', const='l', dest="flag", help="Like current song")
-parser.add_argument('-u', '--unlike', action='store_const', const='u', dest="flag", help="Unlike current song")
-parser.add_argument('-L', '--toggle-like', action='store_const', const='L', dest="flag", help="Toggle between like/unlike")
+parser.add_argument('-f', '--favourite', action='store_const', const='f', dest="flag", help="Like current song")
+parser.add_argument('-u', '--unfavourite', action='store_const', const='u', dest="flag", help="Unlike current song")
+parser.add_argument('-F', '--toggle-favourite', action='store_const', const='F', dest="flag", help="Toggle between like/unlike")
 
 parser.add_argument('-i', '--info', action='store_true', help="Display current song info")
+parser.add_argument('-l', '--list', action='store_true', help="Display song list")
 
 parser.add_argument('-x', '--exit', action='store_true', help="Shutdown the server")
 
@@ -44,6 +45,11 @@ elif args.server:
     listeningfifo.start()
 elif args.info:
     if writepipe('i'):
+        infopipe = listeningfifo.infopipe
+        with open(infopipe, 'r') as p:
+            print p.read()
+elif args.list:
+    if writepipe('l'):
         infopipe = listeningfifo.infopipe
         with open(infopipe, 'r') as p:
             print p.read()

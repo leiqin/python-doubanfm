@@ -5,7 +5,6 @@ import os
 import os.path
 import codecs
 
-from player import Player
 import util
 
 
@@ -14,6 +13,8 @@ infopipe = os.path.expanduser("~/.cache/python-doubanfm/infopipe")
 
 def start():
 
+    # 加快命令行的响应速度
+    from player import Player
     player = Player()
     player.play()
     player.start()
@@ -40,13 +41,13 @@ def start():
                 player.pause()
             else:
                 player.play()
-        elif cmd == 'l':
+        elif cmd == 'f':
             if not player.song.like:
                 player.like()
         elif cmd == 'u':
             if player.song.like:
                 player.unlike()
-        elif cmd == 'L':
+        elif cmd == 'F':
             if player.song.like:
                 player.unlike()
             else:
@@ -64,6 +65,13 @@ def start():
                 print >>infowriter, 'Like     : %s' % song.like
                 print >>infowriter, 'Album    : %s' % song.album
                 print >>infowriter, 'Year     : %s' % song.publicTime
+        elif cmd == 'l':
+            song = player.song
+            songs = player.douban.songs
+            with codecs.open(infopipe, 'w', 'utf-8') as listwriter:
+                print >>listwriter, '%s <%s>' % (song.title, song.artist)
+                for s in songs:
+                    print >>listwriter, '%s <%s>' % (s.title, s.artist)
 
 def mkpipe(pipefile):
     util.initParent(pipefile)

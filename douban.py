@@ -19,6 +19,9 @@ class Douban(object):
     # http://douban.fm/j/mine/playlist?type=e&sid=221320&channel=0&pt=213.4&from=mainsite&r=a2d009faac
     url = 'http://douban.fm/j/mine/playlist'
 
+    useTempfile = False
+    _tempfile = None
+
     def __init__(self):
         self.cookiefile = os.path.expanduser(self.cookiefile)
         cookiejar = cookie.FirecookieCookieJar(self.cookiefile)
@@ -27,7 +30,6 @@ class Douban(object):
         cookieHandler = urllib2.HTTPCookieProcessor(cookiejar)
         self.opener = urllib2.build_opener(cookieHandler)
         self.songs = []
-        self.tempfile = None
         self.lock = threading.Lock()
 
     def _open(self, type='n', sid=None, channel=0, pt=None):
@@ -47,8 +49,8 @@ class Douban(object):
 
     def _parse(self, response):
         j = json.load(response)
-        self.songs = j['song']
-        self.songs.reverse()
+        songs = map(Song , j['song'])
+        self.songs = songs
 
     def next(self, song = None, blocking = True):
         if not self.lock.acquire(blocking):
@@ -71,24 +73,28 @@ class Douban(object):
                 res = self._open(type='s', sid=song.sid, pt=song.time)
                 self._parse(res)
 
-            json = self.songs.pop()
-            result = Song(json)
-            if self.tempfile:
-                os.remove(self.tempfile)
-            fd, self.tempfile = tempfile.mkstemp()
-            r = self.opener.open(result.url)
-            data = r.read()
-            r.close()
-            os.write(fd, data)
-            os.close(fd)
-            result.file = self.tempfile
+            result = self.songs.pop(0)
 
             if not self.songs:
                 res = self._open(type='p', sid=result.sid, pt=0)
                 self._parse(res)
+
+            if self.useTempfile:
+                self._useTempfile(result)
             return result
         finally:
             self.lock.release()
+
+    def _useTempfile(self, song):
+        if self._tempfile and os.path.exists(self._tempfile):
+            os.remove(self.tempfile)
+        r = self.opener.open(result.url)
+        data = r.read()
+        r.close()
+        fd, self.tempfile = tempfile.mkstemp()
+        os.write(fd, data)
+        os.close(fd)
+        song.file = self.tempfile
 
 
     def like(self, song):

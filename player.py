@@ -7,8 +7,6 @@ import pyglet.clock
 
 import douban
 
-media = None
-
 class Player(threading.Thread):
 
     playing = False
@@ -22,9 +20,8 @@ class Player(threading.Thread):
         #
         # 虽说好像没什么大问题，但依然很恼人
         # 只有按需导入了
-        global media
-        if media:
-            from pyglet import media
+        import pyglet.media
+
         threading.Thread.__init__(self)
         self.daemon = True
 
@@ -37,6 +34,29 @@ class Player(threading.Thread):
             song = self.douban.next(self.song, False)
             if song:
                 self.play(song)
+
+        default_update_period = pyglet.media.audio_player_class.UPDATE_PERIOD
+
+        # 常时间播放 CPU 占用率过高的问题找到了
+        # 
+        # 原方法中有类似如下代码：
+        # 
+        # underrun = _audio.pump()
+        # if underrun:
+        #   _audio.UPDATE_PERIOD = _audio.UPDATE_PERIOD * 0.75
+        #   _audio.__class__.UPDATE_PERIOD = _audio.__class__.UPDATE_PERIOD * 0.75
+        #
+        # 意思是如果 _audio 处于播放状态，但是实际的声音引擎处于空闲状态，就是没东西可放
+        # 就提高更新频率 ( UPDATE_PERIOD * 0.75 )
+        # 但是，只提高不降低，长此以往 CPU 就被占满了
+        def dispatch_events(dt=None):
+            pyglet.media.Player.dispatch_events(self.player, dt)
+            if self.player._audio.UPDATE_PERIOD < default_update_period * 0.5:
+                self.player._audio.UPDATE_PERIOD = default_update_period 
+            if self.player._audio.__class__.UPDATE_PERIOD < default_update_period * 0.5:
+                self.player._audio.__class__UPDATE_PERIOD = default_update_period
+
+        self.player.dispatch_events = dispatch_events
 
     # 该方法会阻塞
     def run(self):
@@ -59,12 +79,6 @@ class Player(threading.Thread):
             return
         elif not song:
             song = self.douban.next()
-
-        # for test
-        if type(song) == str:
-            f = song
-            song = douban.Song()
-            song.file = f
 
         self.song = song
         self.player.pause()
