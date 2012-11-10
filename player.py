@@ -6,6 +6,7 @@ import pyglet.app
 import pyglet.clock
 
 import douban
+import util
 
 class Player(threading.Thread):
 
@@ -13,6 +14,7 @@ class Player(threading.Thread):
     song = None
 
     def __init__(self):
+        pass
         # 由于 pyglet.media 在导入后即便什么也没做
         # 也会在退出时出现警告：
         #
@@ -60,7 +62,10 @@ class Player(threading.Thread):
 
     # 该方法会阻塞
     def run(self):
-        pyglet.app.run()
+        try:
+            pyglet.app.run()
+        except:
+            util.logerror()
 
     def next(self, index=0):
         if self.song:

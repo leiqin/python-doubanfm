@@ -7,9 +7,9 @@ import os.path
 import sys
 
 import listeningfifo
-import douban
+import util
 
-parser = argparse.ArgumentParser(description="命令行的 豆瓣FM ，可以使用 Firecookie(firefox 的插件) 导出的 cookie 文件，文件路径为 %s " % douban.Douban.cookiefile)
+parser = argparse.ArgumentParser(description="命令行的 豆瓣FM ，可以使用 Firecookie(firefox 的插件) 导出的 cookie 文件，文件路径为 %s " % util.cookiefile)
 
 parser.add_argument('-s', '--server', action='store_const', const=1, dest='server', help="启动服务，并开始播放")
 parser.add_argument('-U', '--unplay-server', action='store_const', const=2, dest='server', help="仅启动服务")
@@ -32,7 +32,7 @@ parser.add_argument('-x', '--exit', action='store_const', const='x', dest="flag"
 args = parser.parse_args()
 
 def writepipe(ch):
-    cmdpipe = listeningfifo.cmdpipe
+    cmdpipe = util.cmdpipe
     if not os.path.exists(cmdpipe):
         print >>sys.stderr, '服务尚未启动'
         return False
@@ -44,15 +44,15 @@ if args.server:
     if args.server == 1:
         listeningfifo.start()
     else:
-        listeningfifo.unplaystart()
+        listeningfifo.start(False)
 elif args.info:
     if writepipe('i'):
-        infopipe = listeningfifo.infopipe
+        infopipe = util.infopipe
         with open(infopipe, 'r') as p:
             print p.read()
 elif args.list:
     if writepipe('l'):
-        infopipe = listeningfifo.infopipe
+        infopipe = util.infopipe
         with open(infopipe, 'r') as p:
             print p.read()
 elif args.next is not None:

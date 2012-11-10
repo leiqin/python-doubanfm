@@ -11,10 +11,9 @@ import os.path
 import threading
 
 import cookie
+import util
 
 class Douban(object):
-
-    cookiefile = "~/.cache/python-doubanfm/cookies.txt"
 
     # http://douban.fm/j/mine/playlist?type=e&sid=221320&channel=0&pt=213.4&from=mainsite&r=a2d009faac
     url = 'http://douban.fm/j/mine/playlist'
@@ -23,7 +22,7 @@ class Douban(object):
     _tempfile = None
 
     def __init__(self):
-        self.cookiefile = os.path.expanduser(self.cookiefile)
+        self.cookiefile = util.cookiefile
         cookiejar = cookie.FirecookieCookieJar(self.cookiefile)
         if os.path.exists(self.cookiefile) and os.path.isfile(self.cookiefile):
             cookiejar.load()

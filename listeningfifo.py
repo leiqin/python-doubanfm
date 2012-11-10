@@ -7,26 +7,21 @@ import codecs
 
 import util
 
-
-cmdpipe = os.path.expanduser("~/.cache/python-doubanfm/cmdpipe")
-infopipe = os.path.expanduser("~/.cache/python-doubanfm/infopipe")
-
-def unplaystart():
-    start(False)
+cmdpipe = util.cmdpipe
+infopipe = util.infopipe
 
 def start(play=True):
-
-    # 加快命令行的响应速度
-    from player import Player
-    player = Player()
-    if (play):
-        player.play()
-    player.start()
-
-    mkpipe(cmdpipe)
-    mkpipe(infopipe)
-
     try:
+
+        # 加快命令行的响应速度
+        from player import Player
+        player = Player()
+        if (play):
+            player.play()
+        player.start()
+
+        mkpipe()
+
         cmdreader = open(cmdpipe, 'r')
         while True:
             cmd = cmdreader.read(1)
@@ -80,20 +75,23 @@ def start(play=True):
                         print >>listwriter, '%s <%s>' % (song.title, song.artist)
                     for s in songs:
                         print >>listwriter, '%s <%s>' % (s.title, s.artist)
+    except:
+        util.logerror()
+        raise
     finally:
             clearpipe()
 
 def clearpipe():
-    if os.path.exists(cmdpipe):
-        os.remove(cmdpipe)
-    if os.path.exists(infopipe):
-        os.remove(infopipe)
+    for pipe in [cmdpipe, infopipe]:
+        if os.path.exists(pipe):
+            os.remove(pipe)
 
-def mkpipe(pipefile):
-    util.initParent(pipefile)
-    if os.path.exists(pipefile):
-        os.remove(pipefile)
-    os.mkfifo(pipefile, 0600)
+def mkpipe():
+    for pipe in [cmdpipe, infopipe]:
+        util.initParent(pipe)
+        if os.path.exists(pipe):
+            os.remove(pipe)
+        os.mkfifo(pipe, 0600)
         
 
 if __name__ == "__main__":
