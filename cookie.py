@@ -1,4 +1,5 @@
 # copy from _MozillaCookieJar.py
+# encoding=utf-8
 
 import re, time
 import datetime
@@ -31,24 +32,24 @@ class FirecookieCookieJar(FileCookieJar):
 #                        line.split("\t")
 
                 arr = line.strip().split("\t")
-                arr.reverse()
 
-                domain = arr.pop()
-                domain_specified = arr.pop()
-                path = arr.pop()
-                secure = arr.pop()
-                expires = arr.pop()
+                domain = arr.pop(0)
+                domain_specified = arr.pop(0)
+                path = arr.pop(0)
+                secure = arr.pop(0)
+                expires = arr.pop(0)
 
                 try:
                     d = datetime.datetime.strptime(expires, self.timeformat)
                     t = d.timetuple()
                     expires = time.mktime(t)
                 except:
-                    continue
+                    arr.insert(0, expires)
+                    expires = None
 
-                name = arr.pop()
+                name = arr.pop(0)
                 if arr:
-                    value = arr.pop()
+                    value = arr.pop(0)
 
                 secure = (secure == "TRUE")
                 domain_specified = (domain_specified == "TRUE")
@@ -124,4 +125,24 @@ class FirecookieCookieJar(FileCookieJar):
                     "\n")
         finally:
             f.close()
+
+    
+    # 不清除过期的cookie
+    clearExpried = False
+    def clear_expired_cookies(self):
+        if self.clearExpried:
+            cookielib.CookieJar.clear_expired_cookies(self)
+
+class MyCookiePolicy(cookielib.DefaultCookiePolicy):
+
+    def return_ok(self, cookie, request):
+
+        # 不验证是否过期
+        # for n in "version", "verifiability", "secure", "expires", "port", "domain":
+        for n in "version", "verifiability", "secure", "port", "domain":
+            fn_name = "return_ok_"+n
+            fn = getattr(self, fn_name)
+            if not fn(cookie, request):
+                return False
+        return True
 
