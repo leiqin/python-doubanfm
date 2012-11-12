@@ -11,7 +11,7 @@ python 豆瓣FM 命令行客户端
 
 启动服务：
 
-    ./fm.py -s 1>/dev/null 2>&1 &
+    ./fm.py -s 2>/dev/null
 
 下一首：
 

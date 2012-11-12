@@ -67,10 +67,20 @@ if args.server:
         print '服务已经启动，如果服务并未启动请执行 rm %s' % util.cmdpipe
         sys.exit()
     import listeningfifo
+    play = True
     if args.server == 'unplay':
-        listeningfifo.start(False)
-    else:
-        listeningfifo.start()
+        play = False
+    if not os.fork():
+        # pyglet 使用 avbin 解析 mp3 文件，它是 c 的库
+        # 它在解析 mp3 时会向标准错误输出一些信息
+        # 无论是改变 sys.stderr 还是 sys.__stderr__
+        # 都无法重定向这些输出，只好在调用的时候重定向了
+        # 
+        # ./fm.py -s 2>/dev/null
+        #
+        sys.stdout = open(os.path.expanduser(util.stdout), 'w')
+        sys.stderr = open(os.path.expanduser(util.stderr), 'w')
+        listeningfifo.start(play)
 elif args.info:
     if writepipe('i'):
         print readinfo()

@@ -12,6 +12,8 @@ errorfile = "~/.cache/python-doubanfm/error"
 cookiefile = "~/.cache/python-doubanfm/cookies.txt"
 cmdpipe = "~/.cache/python-doubanfm/cmdpipe"
 infopipe = "~/.cache/python-doubanfm/infopipe"
+stdout = "~/.cache/python-doubanfm/stdout"
+stderr = "~/.cache/python-doubanfm/stderr"
 
 def initParent(filepath):
     dirname = os.path.dirname(filepath)
