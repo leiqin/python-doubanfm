@@ -6,15 +6,14 @@ import os.path
 import codecs
 
 import util
+from player import Player
 
-cmdpipe = util.cmdpipe
-infopipe = util.infopipe
+cmdpipe = os.path.expanduser(util.cmdpipe)
+infopipe = os.path.expanduser(util.infopipe)
 
 def start(play=True):
-    try:
 
-        # 加快命令行的响应速度
-        from player import Player
+    try:
         player = Player()
         if (play):
             player.play()
@@ -55,7 +54,7 @@ def start(play=True):
                 else:
                     player.like()
             elif cmd == 'x':
-                player.exit()
+                player.close()
                 clearpipe()
                 return
             elif cmd == 'i':
@@ -79,7 +78,8 @@ def start(play=True):
         util.logerror()
         raise
     finally:
-            clearpipe()
+        clearpipe()
+        player.close()
 
 def clearpipe():
     for pipe in [cmdpipe, infopipe]:

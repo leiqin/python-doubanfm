@@ -22,13 +22,13 @@ class Douban(object):
     _tempfile = None
 
     def __init__(self):
-        self.cookiefile = util.cookiefile
+        self.cookiefile = os.path.expanduser(util.cookiefile)
         policy = cookie.MyCookiePolicy()
-        cookiejar = cookie.FirecookieCookieJar(self.cookiefile, policy=policy)
+        self.cookiejar = cookie.FirecookieCookieJar(self.cookiefile, policy=policy)
         if os.path.exists(self.cookiefile) and os.path.isfile(self.cookiefile):
             # ignore_expires=True 表示加载过期的 cookie
-            cookiejar.load(ignore_expires=True)
-        cookieHandler = urllib2.HTTPCookieProcessor(cookiejar)
+            self.cookiejar.load(ignore_discard=True, ignore_expires=True)
+        cookieHandler = urllib2.HTTPCookieProcessor(self.cookiejar)
         self.opener = urllib2.build_opener(cookieHandler)
         self.songs = []
         self.lock = threading.Lock()
@@ -114,6 +114,10 @@ class Douban(object):
         self._parse(res)
         song.like = False
 
+    def close(self):
+        self.cookiejar.save(ignore_discard=True, ignore_expires=True)
+        
+
 class Song(object):
 
     def __init__(self, data = {}):
@@ -144,5 +148,7 @@ if __name__ == '__main__':
     req = urllib2.Request('http://douban.fm/mine?typed=player')
     f = douban.opener.open(req)
     print req.headers
+    print req.unredirected_hdrs
     r = f.read()
     print r
+    douban.close()

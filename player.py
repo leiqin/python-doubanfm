@@ -100,8 +100,9 @@ class Player(threading.Thread):
         self.song.time = self.player.time
         self.douban.unlike(self.song)
 
-    def exit(self):
+    def close(self):
         pyglet.app.exit()
+        self.douban.close()
 
 
 # 这一行代码是必需的

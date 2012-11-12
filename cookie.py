@@ -2,7 +2,6 @@
 # encoding=utf-8
 
 import re, time
-import datetime
 import cookielib
 
 from cookielib import (_warn_unhandled_exception, FileCookieJar, LoadError,
@@ -40,8 +39,7 @@ class FirecookieCookieJar(FileCookieJar):
                 expires = arr.pop(0)
 
                 try:
-                    d = datetime.datetime.strptime(expires, self.timeformat)
-                    t = d.timetuple()
+                    t = time.strptime(expires, self.timeformat)
                     expires = time.mktime(t)
                 except:
                     arr.insert(0, expires)
@@ -93,7 +91,6 @@ class FirecookieCookieJar(FileCookieJar):
 
         f = open(filename, "w")
         try:
-            f.write(self.header)
             now = time.time()
             for cookie in self:
                 if not ignore_discard and cookie.discard:
@@ -106,8 +103,8 @@ class FirecookieCookieJar(FileCookieJar):
                 else: initial_dot = "FALSE"
                 if cookie.expires is not None:
                     # expires = str(cookie.expires)
-                    d = datetime.datetime.fromtimestamp(expires)
-                    expires = d.strftime(self.timeformat)
+                    t = time.localtime(cookie.expires)
+                    expires = time.strftime(self.timeformat, t)
                 else:
                     expires = ""
                 if cookie.value is None:
@@ -146,3 +143,10 @@ class MyCookiePolicy(cookielib.DefaultCookiePolicy):
                 return False
         return True
 
+    def set_ok(self, cookie, request):
+        ok = cookielib.DefaultCookiePolicy.set_ok(self, cookie, request)
+        with open('/home/leiqin/.cache/python-doubanfm/cookie.log','a') as log:
+            print >>log, time.ctime()
+            print >>log, 'ok = %s' % ok
+            print >>log, cookie
+            print >>log
