@@ -143,10 +143,3 @@ class MyCookiePolicy(cookielib.DefaultCookiePolicy):
                 return False
         return True
 
-    def set_ok(self, cookie, request):
-        ok = cookielib.DefaultCookiePolicy.set_ok(self, cookie, request)
-        with open('/home/leiqin/.cache/python-doubanfm/cookie.log','a') as log:
-            print >>log, time.ctime()
-            print >>log, 'ok = %s' % ok
-            print >>log, cookie
-            print >>log
