@@ -66,7 +66,6 @@ if args.server:
     if os.path.exists(os.path.expanduser(util.cmdpipe)):
         print '服务已经启动，如果服务并未启动请执行 rm %s' % util.cmdpipe
         sys.exit()
-    import listeningfifo
     play = True
     if args.server == 'unplay':
         play = False
@@ -80,6 +79,7 @@ if args.server:
         #
         sys.stdout = open(os.path.expanduser(util.stdout), 'w')
         sys.stderr = open(os.path.expanduser(util.stderr), 'w')
+        import listeningfifo
         listeningfifo.start(play)
 elif args.info:
     if writepipe('i'):
