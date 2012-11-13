@@ -48,7 +48,7 @@ parser.add_argument('-x', '--exit', action='store_const',
 args = parser.parse_args()
 
 def writepipe(ch):
-    cmdpipe = os.path.expanduser(util.cmdpipe)
+    cmdpipe = util.expand(util.cmdpipe)
     if not os.path.exists(cmdpipe):
         print >>sys.stderr, '服务尚未启动'
         return
@@ -58,13 +58,14 @@ def writepipe(ch):
         return True
 
 def readinfo():
-    infopipe = os.path.expanduser(util.infopipe)
+    infopipe = util.expand(util.infopipe)
     with open(infopipe, 'r') as p:
         return p.read()
 
 if args.server:
-    if os.path.exists(os.path.expanduser(util.cmdpipe)):
-        print '服务已经启动，如果服务并未启动请执行 rm %s' % util.cmdpipe
+    cmdpipe = util.expand(util.cmdpipe)
+    if os.path.exists(cmdpipe):
+        print '服务已经启动，如果服务并未启动请执行 rm %s' % cmdpipe
         sys.exit()
     play = True
     if args.server == 'unplay':
@@ -77,8 +78,12 @@ if args.server:
         # 
         # ./fm.py -s 2>/dev/null
         #
-        sys.stdout = open(os.path.expanduser(util.stdout), 'w')
-        sys.stderr = open(os.path.expanduser(util.stderr), 'w')
+        stdout = util.expand(util.stdout)
+        stderr = util.expand(util.stderr)
+        util.initParent(stdout)
+        util.initParent(stderr)
+        sys.stdout = open(stdout, 'w')
+        sys.stderr = open(stderr, 'w')
         import listeningfifo
         listeningfifo.start(play)
 elif args.info:

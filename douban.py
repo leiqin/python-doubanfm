@@ -22,7 +22,7 @@ class Douban(object):
     _tempfile = None
 
     def __init__(self):
-        self.cookiefile = os.path.expanduser(util.cookiefile)
+        self.cookiefile = util.expand(util.cookiefile)
         policy = cookie.MyCookiePolicy()
         self.cookiejar = cookie.FirecookieCookieJar(self.cookiefile, policy=policy)
         if os.path.exists(self.cookiefile) and os.path.isfile(self.cookiefile):

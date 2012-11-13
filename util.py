@@ -10,10 +10,16 @@ import sys
 
 errorfile = "~/.cache/python-doubanfm/error"
 cookiefile = "~/.cache/python-doubanfm/cookies.txt"
-cmdpipe = "~/.cache/python-doubanfm/cmdpipe"
-infopipe = "~/.cache/python-doubanfm/infopipe"
-stdout = "~/.cache/python-doubanfm/stdout"
-stderr = "~/.cache/python-doubanfm/stderr"
+
+cmdpipe = "/tmp/python-doubanfm/$USER/cmdpipe"
+infopipe = "/tmp/python-doubanfm/$USER/infopipe"
+stdout = "/tmp/python-doubanfm/$USER/stdout"
+stderr = "/tmp/python-doubanfm/$USER/stderr"
+
+def expand(path):
+    path = os.path.expanduser(path)
+    path = os.path.expandvars(path)
+    return path
 
 def initParent(filepath):
     dirname = os.path.dirname(filepath)
@@ -24,14 +30,19 @@ def initFile(filepath):
     if os.path.isfile(filepath):
         return
     initParent(filepath)
-    f = open(filepath)
-    f.close()
+    with open(filepath):
+        pass
 
 def logerror():
     print sys.exc_info()
-    with open(os.path.expanduser(errorfile), 'a') as f:
+    with open(expand(errorfile), 'a') as f:
         f.write(time.strftime('%Y-%m-%d %H:%M:%S'))
         f.write('\n')
         traceback.print_exc(file=f)
         f.write('\n')
 
+if __name__ == '__main__':
+    if not os.fork():
+        print 'fork ' + expand(stdout)
+    else:
+        print 'unfork ' + expand(stdout)

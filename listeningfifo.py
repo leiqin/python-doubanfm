@@ -8,8 +8,8 @@ import codecs
 import util
 from player import Player
 
-cmdpipe = os.path.expanduser(util.cmdpipe)
-infopipe = os.path.expanduser(util.infopipe)
+cmdpipe = util.expand(util.cmdpipe)
+infopipe = util.expand(util.infopipe)
 
 def start(play=True):
 
