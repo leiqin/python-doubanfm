@@ -77,9 +77,26 @@ class Douban(object):
     def skip(self, song):
         try:
             self.songs.remove(song)
-            self._checksongs()
         except ValueError:
             pass
+
+    def select(self, song):
+        if not self.song:
+            # new
+            pass
+        elif self.song.time >= self.song.duration:
+            # reach end
+            res = self._open(type='e', sid=self.song.sid, pt=self.song.time)
+            res.close()
+        else:
+            # hand
+            res = self._open(type='s', sid=self.song.sid, pt=self.song.time)
+            # 不更新列表
+            res.close()
+
+        self.song = song
+        self.skip(song)
+        self._checksongs()
 
     def list(self, size=None):
         if size is None:

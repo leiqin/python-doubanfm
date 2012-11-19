@@ -91,7 +91,7 @@ class Player(threading.Thread):
                 song.source.skip(song)
                 index = index - 1
             song = songs.pop(0)
-            song.source.skip(song)
+            song.source.select(song)
             self._playnext(song)
         
     def _next(self, song=None):
