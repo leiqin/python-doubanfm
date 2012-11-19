@@ -27,8 +27,8 @@ class Douban(object):
             self.cookiejar.load(ignore_discard=True, ignore_expires=True)
         cookieHandler = urllib2.HTTPCookieProcessor(self.cookiejar)
         self.opener = urllib2.build_opener(cookieHandler)
+        self.song = None
         self.songs = []
-        self.lock = threading.Lock()
 
     def _open(self, type='n', sid=None, channel=0, pt=None):
         params = {}
@@ -48,44 +48,56 @@ class Douban(object):
 
     def _parse(self, response):
         j = json.load(response)
-        songs = map(Song , j['song'])
+        songs = map(self._buildSong , j['song'])
         self.songs = songs
+    
+    def _buildSong(self, data):
+        song = Song(data)
+        song.source = self
+        return song
 
-    def next(self, song=None, blocking=True, index=0):
-        if not self.lock.acquire(blocking):
-            return
-        try:
-            if not song:
-                # new
-                if not self.songs:
-                    res = self._open()
-                    self._parse(res)
-            elif song.time >= song.length:
-                # reach end
-                res = self._open(type='e', sid=song.sid, pt=song.time)
-                res.close()
-                if not self.songs:
-                    res = self._open(type='p', sid=song.sid, pt=0)
-                    self._parse(res)
-            else:
-                # hand
-                if index <=0 or index > len(self.songs):
-                    res = self._open(type='s', sid=song.sid, pt=song.time)
-                    self._parse(res)
-                else:
-                    while index > 1:
-                        self.songs.pop(0)
-                        index = index - 1
+    def next(self):
+        if not self.song:
+            # new
+            pass
+        elif self.song.time >= self.song.duration:
+            # reach end
+            res = self._open(type='e', sid=self.song.sid, pt=self.song.time)
+            res.close()
+        else:
+            # hand
+            res = self._open(type='s', sid=self.song.sid, pt=self.song.time)
+            self._parse(res)
 
-            result = self.songs.pop(0)
+        self._checksongs()
+        self.song = self.songs.pop(0)
+        self._checksongs()
 
-            if not self.songs:
-                res = self._open(type='p', sid=result.sid, pt=0)
+        return self.song
+
+    def skip(self, song):
+        self.songs.remove(song)
+        self._checksongs()
+
+    def list(self, size=None):
+        if size is None:
+            return list(self.songs)
+        elif size <= 0:
+            return []
+        elif size >= len(self.songs):
+            return list(self.songs)
+        else:
+            return self.songs[:size]
+            
+
+    def _checksongs(self):
+        if not self.songs:
+            if self.song:
+                res = self._open(type='p', sid=self.song.sid, pt=0)
                 self._parse(res)
-
-            return result
-        finally:
-            self.lock.release()
+            else:
+                res = self._open()
+                self._parse(res)
 
     def like(self, song):
         res = self._open(type='r', sid=song.sid, pt=song.time)
@@ -108,6 +120,8 @@ class Song(object):
     file = None
     url = None
     tmpfile = None
+    source = None
+    mp3source = None
 
     def __init__(self, data = {}):
         self.data = data
@@ -127,6 +141,9 @@ class Song(object):
         if self.length:
             self.length = float(self.length)
 
+    def __str__(self):
+        return self.info()
+
     def info(self):
         output = StringIO.StringIO()
         output.write('Title     : %s\n' % self.title)
@@ -135,8 +152,8 @@ class Song(object):
         output.write('Album     : %s\n' % self.album)
         output.write('Public    : %s\n' % self.publicTime)
         if self.time and self.duration:
-            output.write('Time      : %.2f\n' % self.time)
-            output.write('Duration  : %.2f\n' % self.duration)
+            output.write('Time      : %.1f\n' % self.time)
+            output.write('Duration  : %.1f\n' % self.duration)
         result = output.getvalue()
         output.close()
         return result

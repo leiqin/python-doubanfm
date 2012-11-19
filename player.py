@@ -4,9 +4,12 @@
 import threading
 import pyglet.app
 import pyglet.clock
+from pyglet.media.avbin import AVbinException
 
 import douban
 import util
+
+MAX_LIST_SIZE = 10
 
 class Player(threading.Thread):
 
@@ -27,15 +30,18 @@ class Player(threading.Thread):
         threading.Thread.__init__(self)
         self.daemon = True
 
-        self.douban = douban.Douban()
+        self.songs = []
+        self.source = douban.Douban()
         self.player = pyglet.media.Player()
         @self.player.event
         def on_eos():
-            if self.song:
-                self.song.time = self.song.length
-            song = self.douban.next(self.song, False)
+            # 更新 self.song.time
+            song = self.song
             if song:
-                self.play(song)
+                # duration 和 time 用于判断歌曲是否播放到结束
+                # 有时文件头指定的 duration 和歌曲的实际长度并不一致
+                song.duration = song.time
+            self._playnext()
 
         default_update_period = pyglet.media.audio_player_class.UPDATE_PERIOD
 
@@ -68,10 +74,59 @@ class Player(threading.Thread):
             util.logerror()
 
     def next(self, index=0):
-        if self.song:
-            self.song.time = self.player.time
-        song = self.douban.next(self.song, index=index)
-        self.play(song)
+        # 更新 self.song.time
+        self.song
+        songs = self.songs
+        if not index or index < 0 or not songs:
+            # 未指定 index，index 无效，未获取列表就使用 index
+            self._playnext()
+        elif index > len(songs):
+            for song in songs:
+                song.source.skip(song)
+            self._playnext()
+        else:
+            while index > 1:
+                song = songs.pop(0)
+                song.source.skip(song)
+                index = index - 1
+            song = songs.pop(0)
+            song.source.skip(song)
+            self._playnext(song)
+        
+    def _next(self, song=None):
+        if song:
+            if song.mp3source:
+                return song
+            else:
+                try:
+                    return self._load(song)
+                except AVbinException:
+                    util.logerror()
+
+        while True:
+            song = self.source.next()
+            try:
+                return self._load(song)
+            except AVbinException:
+                util.logerror()
+
+    def _load(self, song):
+        song.mp3source = pyglet.media.load(song.file or song.url)
+        song.duration = song.mp3source.duration
+        return song
+
+    def _play(self, song):
+        self.playing = True
+        self.song = song
+        self.songs = []
+        self.player.pause()
+        self.player.next()
+        self.player.queue(song.mp3source)
+        self.player.play()
+
+    def _playnext(self, song=None):
+        song = self._next(song)
+        self._play(song)
 
     def pause(self):
         self.playing = False
@@ -82,36 +137,35 @@ class Player(threading.Thread):
         if not song and self.song:
             self.player.play()
             return
-        elif not song:
-            song = self.douban.next()
+        self._playnext(song)
 
-        self.song = song
-        self.player.pause()
-        self.player.next()
-        mp3source = pyglet.media.load(song.file or song.url)
-        song.duration = mp3source.duration
-        song.mp3source = mp3source
-        self.player.queue(mp3source)
-        self.player.play()
 
     def list(self):
         result = []
+        size = MAX_LIST_SIZE
         if self.song:
             result.append(self.song)
-        result.extend(self.douban.songs)
+            size = size - 1
+        self.songs = self.source.list(size)
+        if self.songs:
+            result.extend(self.songs)
         return result
 
     def like(self):
-        self.song.time = self.player.time
-        self.douban.like(self.song)
+        song = self.song
+        if hasattr(song.source, 'like'):
+            m = getattr(song.source, 'like')
+            m(song)
 
     def unlike(self):
-        self.song.time = self.player.time
-        self.douban.unlike(self.song)
+        song = self.song
+        if hasattr(song.source, 'unlike'):
+            m = getattr(song.source, 'unlike')
+            m(song)
 
     def close(self):
         pyglet.app.exit()
-        self.douban.close()
+        self.source.close()
 
     def __getattribute__(self, name):
         if name == 'time' and self.player:
