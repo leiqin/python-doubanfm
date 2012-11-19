@@ -5,10 +5,10 @@ import urllib
 import urllib2
 import cookielib
 import json
-import tempfile
 import os
 import os.path
 import threading
+import StringIO
 
 import cookie
 import util
@@ -17,9 +17,6 @@ class Douban(object):
 
     # http://douban.fm/j/mine/playlist?type=e&sid=221320&channel=0&pt=213.4&from=mainsite&r=a2d009faac
     url = 'http://douban.fm/j/mine/playlist'
-
-    useTempfile = False
-    _tempfile = None
 
     def __init__(self):
         self.cookiefile = util.expand(util.cookiefile)
@@ -86,23 +83,9 @@ class Douban(object):
                 res = self._open(type='p', sid=result.sid, pt=0)
                 self._parse(res)
 
-            if self.useTempfile:
-                self._useTempfile(result)
             return result
         finally:
             self.lock.release()
-
-    def _useTempfile(self, song):
-        if self._tempfile and os.path.exists(self._tempfile):
-            os.remove(self.tempfile)
-        r = self.opener.open(result.url)
-        data = r.read()
-        r.close()
-        fd, self.tempfile = tempfile.mkstemp()
-        os.write(fd, data)
-        os.close(fd)
-        song.file = self.tempfile
-
 
     def like(self, song):
         res = self._open(type='r', sid=song.sid, pt=song.time)
@@ -119,6 +102,12 @@ class Douban(object):
         
 
 class Song(object):
+
+    time = 0
+    duration = 0
+    file = None
+    url = None
+    tmpfile = None
 
     def __init__(self, data = {}):
         self.data = data
@@ -137,8 +126,23 @@ class Song(object):
         self.length = self.data.get('length')
         if self.length:
             self.length = float(self.length)
-        self.time = 0
-        self.file = None
+
+    def info(self):
+        output = StringIO.StringIO()
+        output.write('Title     : %s\n' % self.title)
+        output.write('Artist    : %s\n' % self.artist)
+        output.write('Like      : %s\n' % self.like)
+        output.write('Album     : %s\n' % self.album)
+        output.write('Public    : %s\n' % self.publicTime)
+        if self.time and self.duration:
+            output.write('Time      : %.2f\n' % self.time)
+            output.write('Duration  : %.2f\n' % self.duration)
+        result = output.getvalue()
+        output.close()
+        return result
+
+    def oneline(self):
+        return ''.join(self.title, ' <', self.artist, '>')
 
 
 if __name__ == '__main__':

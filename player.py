@@ -88,8 +88,10 @@ class Player(threading.Thread):
         self.song = song
         self.player.pause()
         self.player.next()
-        source = pyglet.media.load(song.file or song.url)
-        self.player.queue(source)
+        mp3source = pyglet.media.load(song.file or song.url)
+        song.duration = mp3source.duration
+        song.mp3source = mp3source
+        self.player.queue(mp3source)
         self.player.play()
 
     def like(self):
@@ -103,6 +105,19 @@ class Player(threading.Thread):
     def close(self):
         pyglet.app.exit()
         self.douban.close()
+
+    def __getattribute__(self, name):
+        if name == 'time' and self.player:
+            return self.player.time
+        elif name == 'song' and self.player:
+            song = object.__getattribute__(self, name)
+            if song:
+                song.time = self.time
+                return song
+            else:
+                return None
+        else:
+            return object.__getattribute__(self, name)
 
 
 # 这一行代码是必需的
