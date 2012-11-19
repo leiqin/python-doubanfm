@@ -7,7 +7,6 @@ import cookielib
 import json
 import os
 import os.path
-import threading
 import StringIO
 
 import cookie
@@ -76,8 +75,11 @@ class Douban(object):
         return self.song
 
     def skip(self, song):
-        self.songs.remove(song)
-        self._checksongs()
+        try:
+            self.songs.remove(song)
+            self._checksongs()
+        except ValueError:
+            pass
 
     def list(self, size=None):
         if size is None:
@@ -140,9 +142,6 @@ class Song(object):
         self.length = self.data.get('length')
         if self.length:
             self.length = float(self.length)
-
-    def __str__(self):
-        return self.info()
 
     def info(self):
         output = StringIO.StringIO()
