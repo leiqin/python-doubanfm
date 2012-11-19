@@ -65,7 +65,9 @@ def start(play=True):
                         print >>infowriter, 'Artist   : %s' % song.artist
                         print >>infowriter, 'Like     : %s' % song.like
                         print >>infowriter, 'Album    : %s' % song.album
-                        print >>infowriter, 'Year     : %s' % song.publicTime
+                        print >>infowriter, 'Public   : %s' % song.publicTime
+                        print >>infowriter, 'Time     : %.2f' % player.player.time
+                        print >>infowriter, 'Length   : %.2f' % song.length
             elif cmd == 'l':
                 song = player.song
                 songs = player.douban.songs
