@@ -142,7 +142,7 @@ class Song(object):
         return result
 
     def oneline(self):
-        return ''.join(self.title, ' <', self.artist, '>')
+        return ''.join([self.title, ' <', self.artist, '>'])
 
 
 if __name__ == '__main__':

@@ -63,13 +63,10 @@ def start(play=True):
                     if song:
                         infowriter.write(song.info())
             elif cmd == 'l':
-                song = player.song
-                songs = player.douban.songs
+                songs = player.list()
                 with codecs.open(infopipe, 'w', 'utf-8') as listwriter:
-                    if song:
-                        print >>listwriter, song.oneline()
                     for s in songs:
-                        print >>listwriter, song.oneline()
+                        print >>listwriter, s.oneline()
     except:
         util.logerror()
         raise

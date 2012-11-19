@@ -94,6 +94,13 @@ class Player(threading.Thread):
         self.player.queue(mp3source)
         self.player.play()
 
+    def list(self):
+        result = []
+        if self.song:
+            result.append(self.song)
+        result.extend(self.douban.songs)
+        return result
+
     def like(self):
         self.song.time = self.player.time
         self.douban.like(self.song)
