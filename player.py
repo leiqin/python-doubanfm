@@ -31,6 +31,7 @@ class Player(threading.Thread):
         self.daemon = True
 
         self.songs = []
+        self.lock = threading.Lock()
         self.source = douban.Douban()
         self.player = pyglet.media.Player()
         @self.player.event
@@ -41,7 +42,7 @@ class Player(threading.Thread):
                 # duration 和 time 用于判断歌曲是否播放到结束
                 # 有时文件头指定的 duration 和歌曲的实际长度并不一致
                 song.duration = song.time
-            self._playnext()
+            self._playnext(blocking=False)
 
         default_update_period = pyglet.media.audio_player_class.UPDATE_PERIOD
 
@@ -90,7 +91,7 @@ class Player(threading.Thread):
                 song.source.skip(song)
                 index = index - 1
             song = songs.pop(0)
-            song.source.skip(song)
+            song.source.select(song)
             self._playnext(song)
         
     def _next(self, song=None):
@@ -124,9 +125,14 @@ class Player(threading.Thread):
         self.player.queue(song.mp3source)
         self.player.play()
 
-    def _playnext(self, song=None):
-        song = self._next(song)
-        self._play(song)
+    def _playnext(self, song=None, blocking=True):
+        if not self.lock.acquire(blocking):
+            return
+        try:
+            song = self._next(song)
+            self._play(song)
+        finally:
+            self.lock.release()
 
     def pause(self):
         self.playing = False
