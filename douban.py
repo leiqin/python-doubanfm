@@ -179,11 +179,6 @@ class Song(object):
     def oneline(self):
         return ''.join([self.title, ' <', self.artist, '>'])
 
-    def __del__(self):
-        if self.tmpfile and os.path.exists(self.tmpfile):
-            os.remove(self.tmpfile)
-
-
 if __name__ == '__main__':
     douban = Douban()
 #    res = douban._open(type='r', sid='35875', pt = 20.0)
