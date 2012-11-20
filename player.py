@@ -124,7 +124,9 @@ class Player(threading.Thread):
         return song
 
     def _play(self, song, seek=None):
-        self._clearTmpfile()
+        if self.song and self.song != song:
+            self._clearTmpfile()
+
         self.playing = True
         self.song = song
         self.songs = []
@@ -169,7 +171,7 @@ class Player(threading.Thread):
             else:
                 self.player.play()
         else:
-            self._playnext(song)
+            self._playnext()
 
 
     def list(self):
@@ -188,12 +190,14 @@ class Player(threading.Thread):
         if hasattr(song.source, 'like'):
             m = getattr(song.source, 'like')
             m(song)
+            self.songs = []
 
     def unlike(self):
         song = self.song
         if hasattr(song.source, 'unlike'):
             m = getattr(song.source, 'unlike')
             m(song)
+            self.songs = []
 
     def close(self):
         pyglet.app.exit()
@@ -229,7 +233,7 @@ class DownloadFile(threading.Thread):
 
     def run(self):
         url = self.song.url
-        fd, tmpfile = tempfile.mkstemp()
+        fd, tmpfile = tempfile.mkstemp('.mp3')
         respose = urllib2.urlopen(url)
         while True:
             data = respose.read(4096)
