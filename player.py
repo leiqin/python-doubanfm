@@ -2,6 +2,10 @@
 # encoding=utf-8
 
 import threading
+import tempfile
+import os
+import os.path
+import urllib2
 import pyglet.app
 import pyglet.clock
 from pyglet.media.avbin import AVbinException
@@ -112,38 +116,62 @@ class Player(threading.Thread):
                 util.logerror()
 
     def _load(self, song):
-        song.mp3source = pyglet.media.load(song.file or song.url)
+        tmpfile = song.tmpfile
+        song.mp3source = pyglet.media.load(tmpfile or song.file or song.url)
+        if tmpfile or song.file:
+            song.isLocal = True
         song.duration = song.mp3source.duration
         return song
 
-    def _play(self, song):
+    def _play(self, song, seek=None):
+        if self.song and self.song != song:
+            self._clearTmpfile()
+
         self.playing = True
         self.song = song
         self.songs = []
         self.player.pause()
         self.player.next()
         self.player.queue(song.mp3source)
+        if seek:
+            self.player.seek(seek)
         self.player.play()
 
-    def _playnext(self, song=None, blocking=True):
+    def _playnext(self, song=None, seek=None, blocking=True):
         if not self.lock.acquire(blocking):
             return
         try:
             song = self._next(song)
-            self._play(song)
+            self._play(song, seek)
         finally:
             self.lock.release()
 
+    def _download(self, song):
+        thread = DownloadFile(song)
+        thread.start()
+
     def pause(self):
+        if not self.playing:
+            return
         self.playing = False
         self.player.pause()
+        song = self.song
+        if not song.isLocal and not song.tmpfile:
+            self._download(song)
 
-    def play(self, song = None):
-        self.playing = True
-        if not song and self.song:
-            self.player.play()
+    def play(self):
+        if self.playing:
             return
-        self._playnext(song)
+        self.playing = True
+        song = self.song
+        if song:
+            if not song.isLocal and song.tmpfile:
+                song = self._load(song)
+                self._playnext(song, song.time)
+            else:
+                self.player.play()
+        else:
+            self._playnext()
 
 
     def list(self):
@@ -162,16 +190,27 @@ class Player(threading.Thread):
         if hasattr(song.source, 'like'):
             m = getattr(song.source, 'like')
             m(song)
+            self.songs = []
 
     def unlike(self):
         song = self.song
         if hasattr(song.source, 'unlike'):
             m = getattr(song.source, 'unlike')
             m(song)
+            self.songs = []
 
     def close(self):
         pyglet.app.exit()
+        self._clearTmpfile()
         self.source.close()
+
+    def _clearTmpfile(self):
+        song = self.song
+        if not song:
+            return
+        tmpfile = song.tmpfile
+        if tmpfile and os.path.exists(tmpfile):
+            os.remove(tmpfile)
 
     def __getattribute__(self, name):
         if name == 'time' and self.player:
@@ -186,6 +225,24 @@ class Player(threading.Thread):
         else:
             return object.__getattribute__(self, name)
 
+class DownloadFile(threading.Thread):
+
+    def __init__(self, song):
+        threading.Thread.__init__(self)
+        self.song = song
+
+    def run(self):
+        url = self.song.url
+        fd, tmpfile = tempfile.mkstemp('.mp3')
+        respose = urllib2.urlopen(url)
+        while True:
+            data = respose.read(4096)
+            if not data:
+                break
+            os.write(fd, data)
+        respose.close()
+        os.close(fd)
+        self.song.tmpfile = tmpfile
 
 # 这一行代码是必需的
 # pyglet 是由 pyglet.app.run() 进行实际的播放
