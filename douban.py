@@ -134,12 +134,14 @@ class Douban(object):
 
 class Song(object):
 
+    source = None
     time = 0
     duration = 0
-    file = None
     url = None
+    file = None
+
+    isLocal = False
     tmpfile = None
-    source = None
     mp3source = None
 
     def __init__(self, data = {}):
@@ -176,6 +178,10 @@ class Song(object):
 
     def oneline(self):
         return ''.join([self.title, ' <', self.artist, '>'])
+
+    def __del__(self):
+        if self.tmpfile and os.path.exists(self.tmpfile):
+            os.remove(self.tmpfile)
 
 
 if __name__ == '__main__':
