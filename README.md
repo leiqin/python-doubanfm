@@ -11,31 +11,31 @@ python 豆瓣FM 命令行客户端
 
 启动服务：
 
-    ./fm.py -s 2>/dev/null
+    fm -s 2>/dev/null
 
 下一首：
 
-    ./fm.py -n
+    fm -n
 
 暂停/继续：
 
-    ./fm.py -G
+    fm -G
 
 当前歌曲：
 
-    ./fm.py -i
+    fm -i
 
 喜欢：
 
-    ./fm.py -f
+    fm -f
 
 不喜欢：
 
-    ./fm.py -u
+    fm -u
 
 退出：
 
-    ./fm.py -x
+    fm -x
 
 
 可以用 Firecookie 导出 firefox 的 cookie 到 ~/.cache/python-doubanfm/cookies.txt
