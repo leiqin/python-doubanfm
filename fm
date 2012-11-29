@@ -76,7 +76,7 @@ if args.server:
         # 无论是改变 sys.stderr 还是 sys.__stderr__
         # 都无法重定向这些输出，只好在调用的时候重定向了
         # 
-        # ./fm.py -s 2>/dev/null
+        # fm -s 2>/dev/null
         #
         stdout = lqfm.util.expand(lqfm.util.stdout)
         stderr = lqfm.util.expand(lqfm.util.stderr)
