@@ -21,6 +21,7 @@ def start(play=True):
         player.start()
 
         s = socket.socket(socket.AF_UNIX)
+        lqfm.util.initParent(socketfile)
         s.bind(socketfile)
         s.listen(1)
 
