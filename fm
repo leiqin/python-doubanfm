@@ -82,8 +82,8 @@ if args.server:
         lqfm.util.initParent(stderr)
         sys.stdout = open(stdout, 'w')
         sys.stderr = open(stderr, 'w')
-        import lqfm.listeningfifo
-        lqfm.listeningfifo.start(play)
+        import lqfm.listening
+        lqfm.listening.start(play)
 elif args.info:
     if serverHasStart():
         s = send('i')
