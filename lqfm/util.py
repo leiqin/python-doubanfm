@@ -11,8 +11,7 @@ import sys
 errorfile = "~/.cache/python-doubanfm/error"
 cookiefile = "~/.cache/python-doubanfm/cookies.txt"
 
-cmdpipe = "/tmp/python-doubanfm/$USER/cmdpipe"
-infopipe = "/tmp/python-doubanfm/$USER/infopipe"
+socketfile = "/tmp/python-doubanfm/$USER/socket"
 stdout = "/tmp/python-doubanfm/$USER/stdout"
 stderr = "/tmp/python-doubanfm/$USER/stderr"
 

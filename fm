@@ -5,6 +5,7 @@ import argparse
 import os
 import os.path
 import sys
+import socket
 
 import lqfm.util
 
@@ -47,25 +48,22 @@ parser.add_argument('-x', '--exit', action='store_const',
 
 args = parser.parse_args()
 
-def writepipe(ch):
-    cmdpipe = lqfm.util.expand(lqfm.util.cmdpipe)
-    if not os.path.exists(cmdpipe):
-        print >>sys.stderr, '服务尚未启动'
-        return
-        return False
-    with open(cmdpipe, 'w') as p:
-        p.write(ch)
-        return True
+def serverHasStart():
+    socketfile = lqfm.util.expand(lqfm.util.socketfile)
+    return os.path.exists(socketfile)
 
-def readinfo():
-    infopipe = lqfm.util.expand(lqfm.util.infopipe)
-    with open(infopipe, 'r') as p:
-        return p.read()
+def send(ch):
+    socketfile = lqfm.util.expand(lqfm.util.socketfile)
+    s = socket.socket(socket.AF_UNIX)
+    s.connect(socketfile)
+    s.sendall(ch)
+    return s
+
 
 if args.server:
-    cmdpipe = lqfm.util.expand(lqfm.util.cmdpipe)
-    if os.path.exists(cmdpipe):
-        print '服务已经启动，如果服务并未启动请执行 rm %s' % cmdpipe
+    socketfile = lqfm.util.expand(lqfm.util.socketfile)
+    if os.path.exists(socketfile):
+        print '服务已经启动，如果服务并未启动请执行 rm %s' % socketfile
         sys.exit()
     play = True
     if args.server == 'unplay':
@@ -87,19 +85,43 @@ if args.server:
         import lqfm.listeningfifo
         lqfm.listeningfifo.start(play)
 elif args.info:
-    if writepipe('i'):
-        print readinfo()
+    if serverHasStart():
+        s = send('i')
+        result = ''
+        while True:
+            temp = s.recv(1024)
+            if not temp:
+                break
+            result = result + temp
+        print result
+    else:
+        print >>sys.stderr, '服务尚未启动'
 elif args.list:
-    if writepipe('l'):
-        print readinfo()
+    if serverHasStart():
+        s = send('l')
+        result = ''
+        while True:
+            temp = s.recv(1024)
+            if not temp:
+                break
+            result = result + temp
+        print result
+    else:
+        print >>sys.stderr, '服务尚未启动'
 elif args.next is not None:
-    index = int(args.next)
-    index = min(255 , index)
-    index = max(0 , index)
-    flag = 'n' + chr(index)
-    writepipe(flag)
+    if serverHasStart():
+        index = int(args.next)
+        index = min(255 , index)
+        index = max(0 , index)
+        flag = 'n' + chr(index)
+        send(flag)
+    else:
+        print >>sys.stderr, '服务尚未启动'
 elif args.flag:
-    writepipe(args.flag)
+    if serverHasStart():
+        send(args.flag)
+    else:
+        print >>sys.stderr, '服务尚未启动'
 else:
     parser.print_help()
 
