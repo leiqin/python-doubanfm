@@ -7,6 +7,7 @@ import cookielib
 import json
 import os
 import os.path
+import time
 import StringIO
 
 import lqfm.cookie
@@ -24,6 +25,7 @@ class Douban(object):
         if os.path.exists(self.cookiefile) and os.path.isfile(self.cookiefile):
             # ignore_expires=True 表示加载过期的 cookie
             self.cookiejar.load(ignore_discard=True, ignore_expires=True)
+        self.lastSaveCookieTime = time.time()
         cookieHandler = urllib2.HTTPCookieProcessor(self.cookiejar)
         self.opener = urllib2.build_opener(cookieHandler)
         self.song = None
@@ -56,6 +58,11 @@ class Douban(object):
         return song
 
     def next(self):
+        # 定时保存 cookie
+        if time.time() - self.lastSaveCookieTime > 3600:
+            self.cookiejar.save(ignore_discard=True, ignore_expires=True)
+            self.lastSaveCookieTime = time.time()
+
         if not self.song:
             # new
             pass
