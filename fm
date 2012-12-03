@@ -108,7 +108,7 @@ elif args.next is not None:
         print >>sys.stderr, '服务尚未启动'
 elif args.cmd:
     if serverHasStart():
-        if args.cmd == 'info' or args.cmd == 'list':
+        if args.cmd in ['info', 'list']:
             sendcmd(args.cmd, True)
         else:
             sendcmd(args.cmd, args.reply)
