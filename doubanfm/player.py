@@ -14,6 +14,8 @@ import doubanfm.douban
 import doubanfm.util
 
 MAX_LIST_SIZE = 10
+MAX_WAIT_TIME = 1024
+MIN_WAIT_TIME = 2
 
 class Player(threading.Thread):
 
@@ -34,18 +36,35 @@ class Player(threading.Thread):
         self.daemon = True
 
         self.songs = []
-        self.lock = threading.Lock()
+        self.condition = threading.Condition()
         self.source = doubanfm.douban.Douban()
         self.player = pyglet.media.Player()
         @self.player.event
         def on_eos():
-            # 更新 self.song.time
-            song = self.song
-            if song:
+            if not self.condition.acquire(False):
+                return
+            try:
+                # 更新 self.song.time
+                song = self.song
                 # duration 和 time 用于判断歌曲是否播放到结束
                 # 有时文件头指定的 duration 和歌曲的实际长度并不一致
+                # 以实际长度为准
                 song.duration = song.time
-            self._playnext(blocking=False)
+                waitTime = MIN_WAIT_TIME
+                while song == self.song and song.duration == song.time:
+                    # 如果是网络故障，当前歌曲没有变
+                    # 当前歌曲的播放时间也没变，就继续重试
+                    try:
+                        self._playnext()
+                        break
+                    except urllib2.URLError:
+                        doubanfm.util.logerror()
+                        self.condition.wait(waitTime)
+                        if waitTime < MAX_WAIT_TIME:
+                            waitTime = waitTime * 2
+                        continue
+            finally:
+                self.condition.release()
 
         default_update_period = pyglet.media.audio_player_class.UPDATE_PERIOD
 
@@ -79,24 +98,25 @@ class Player(threading.Thread):
             raise
 
     def next(self, index=0):
-        # 更新 self.song.time
-        self.song
-        songs = self.songs
-        if not index or index < 0 or not songs:
-            # 未指定 index，index 无效，未获取列表就使用 index
-            self._playnext()
-        elif index > len(songs):
-            for song in songs:
-                song.source.skip(song)
-            self._playnext()
-        else:
-            while index > 1:
+        with self.condition:
+            # 更新 self.song.time
+            self.song
+            songs = self.songs
+            if not index or index < 0 or not songs:
+                # 未指定 index，index 无效，未获取列表就使用 index
+                self._playnext()
+            elif index > len(songs):
+                for song in songs:
+                    song.source.skip(song)
+                self._playnext()
+            else:
+                while index > 1:
+                    song = songs.pop(0)
+                    song.source.skip(song)
+                    index = index - 1
                 song = songs.pop(0)
-                song.source.skip(song)
-                index = index - 1
-            song = songs.pop(0)
-            song.source.select(song)
-            self._playnext(song)
+                song.source.select(song)
+                self._playnext(song)
         
     def _next(self, song=None):
         if song:
@@ -124,74 +144,80 @@ class Player(threading.Thread):
         return song
 
     def _play(self, song, seek=None):
-        if self.song and self.song != song:
-            self._clearTmpfile()
+        with self.condition:
+            if self.song and self.song != song:
+                self._clearTmpfile()
+                self.song.mp3source = None
 
-        self.song = song
-        self.songs = []
-        self.player.pause()
-        self.player.next()
-        self.player.queue(song.mp3source)
-        if seek:
-            self.player.seek(seek)
-        self.player.play()
+            self.song = song
+            self.songs = []
+            self.player.pause()
+            self.player.next()
+            self.player.queue(song.mp3source)
+            if seek:
+                self.player.seek(seek)
+            self.player.play()
+            self.condition.notifyAll()
 
-    def _playnext(self, song=None, seek=None, blocking=True):
-        if not self.lock.acquire(blocking):
-            return
-        try:
+    def _playnext(self, song=None, seek=None):
+        with self.condition:
             song = self._next(song)
             self._play(song, seek)
-        finally:
-            self.lock.release()
 
     def _download(self, song):
         thread = DownloadFile(song)
         thread.start()
 
     def pause(self):
-        if not self.player.playing:
-            return
-        self.player.pause()
-        song = self.song
-        if not song.isLocal and not song.tmpfile:
-            self._download(song)
+        with self.condition:
+            if not self.player.playing:
+                return
+            self.player.pause()
+            song = self.song
+            if not song.isLocal and not song.tmpfile:
+                self._download(song)
 
     def play(self):
-        if self.player.playing:
-            return
-        song = self.song
-        if song:
-            if not song.isLocal and song.tmpfile:
-                song = self._load(song)
-                self._playnext(song, song.time)
+        with self.condition:
+            if self.player.playing:
+                return
+            song = self.song
+            if song:
+                if not song.isLocal and song.tmpfile:
+                    song = self._load(song)
+                    self._playnext(song, song.time)
+                else:
+                    self.player.play()
             else:
-                self.player.play()
+                self._playnext()
 
     def list(self):
-        result = []
-        size = MAX_LIST_SIZE
-        if self.song:
-            result.append(self.song)
-            size = size - 1
-        self.songs = self.source.list(size)
-        if self.songs:
-            result.extend(self.songs)
-        return result
+        with self.condition:
+            result = []
+            size = MAX_LIST_SIZE
+            if self.song:
+                result.append(self.song)
+                size = size - 1
+            self.songs = self.source.list(size)
+            if self.songs:
+                result.extend(self.songs)
+            return result
 
     def like(self):
-        song = self.song
-        if hasattr(song.source, 'like'):
-            m = getattr(song.source, 'like')
-            m(song)
-            self.songs = []
+        with self.condition:
+            song = self.song
+            if hasattr(song.source, 'like'):
+                m = getattr(song.source, 'like')
+                m(song)
+                self.songs = []
 
     def unlike(self):
-        song = self.song
-        if hasattr(song.source, 'unlike'):
-            m = getattr(song.source, 'unlike')
-            m(song)
-            self.songs = []
+        with self.condition:
+            song = self.song
+            if hasattr(song.source, 'unlike'):
+                m = getattr(song.source, 'unlike')
+                m(song)
+                self.songs = []
 
     def close(self):
         pyglet.app.exit()
@@ -205,9 +231,12 @@ class Player(threading.Thread):
         tmpfile = song.tmpfile
         if tmpfile and os.path.exists(tmpfile):
             os.remove(tmpfile)
+        song.tmpfile = None
 
     def __getattribute__(self, name):
-        if name == 'time' and self.player:
+        if name == 'playing' and self.player:
+            return self.player.playing
+        elif name == 'time' and self.player:
             return self.player.time
         elif name == 'song' and self.player:
             song = object.__getattribute__(self, name)

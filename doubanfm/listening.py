@@ -20,7 +20,7 @@ def initPlayer():
 def start():
 
     try:
-        initPlayer(play)
+        initPlayer()
 
         s = socket.socket(socket.AF_UNIX)
         doubanfm.util.initParent(socketfile)
