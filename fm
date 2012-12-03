@@ -21,49 +21,70 @@ parser.add_argument('-U', '--unplay-server', action='store_const',
         const=2, dest='server', help="仅启动服务")
 
 parser.add_argument('-p', '--play', action='store_const', 
-        const='p', dest="flag", help="播放")
+        const='play', dest="cmd", help="播放")
 parser.add_argument('-P', '--pause', action='store_const', 
-        const='P', dest="flag", help="暂停")
+        const='pause', dest="cmd", help="暂停")
 parser.add_argument('-G', '--toggle-pause', action='store_const', 
-        const='G', dest="flag", help="播放/暂停")
+        const='togglePause', dest="cmd", help="播放/暂停")
 
 parser.add_argument('-n', '--next', action='store',
         nargs='?', const=0, type=int, 
         help="下一首歌曲，可以指定播放第 n 首歌曲，\
-                如果 n 为 0 或者 n 超过歌曲列表长度，则会获取新的歌曲列表，\
+                如果 n 为 0 ，则会获取新的歌曲列表，\
                 这是 豆瓣FM 默认的行为，如果不指定 n 默认为 0")
 
 parser.add_argument('-f', '--favourite', action='store_const', 
-        const='f', dest="flag", help="喜欢")
+        const='favourite', dest="cmd", help="喜欢")
 parser.add_argument('-u', '--unfavourite', action='store_const', 
-        const='u', dest="flag", help="不喜欢")
+        const='unFavourite', dest="cmd", help="不喜欢")
 parser.add_argument('-F', '--toggle-favourite', action='store_const', 
-        const='F', dest="flag", help="喜欢/不喜欢")
+        const='toggleFavourite', dest="cmd", help="喜欢/不喜欢")
 
-parser.add_argument('-i', '--info', action='store_true', help="当前歌曲信息")
-parser.add_argument('-l', '--list', action='store_true', help="歌曲列表")
+parser.add_argument('-i', '--info', action='store_const',
+        const='info', dest='cmd', help="当前歌曲信息")
+parser.add_argument('-l', '--list', action='store_const',
+        const='list', dest='cmd',  help="歌曲列表")
 
 parser.add_argument('-x', '--exit', action='store_const', 
-        const='x', dest="flag", help="关闭服务")
+        const='exit', dest="cmd", help="关闭服务")
 
 args = parser.parse_args()
 
 def serverHasStart():
-    socketfile = doubanfm.util.expand(doubanfm.util.socketfile)
+    socketfile = doubanfm.util.socketfile
     return os.path.exists(socketfile)
 
-def send(ch):
-    socketfile = doubanfm.util.expand(doubanfm.util.socketfile)
+def getsocket():
+    socketfile = doubanfm.util.socketfile
     s = socket.socket(socket.AF_UNIX)
     s.connect(socketfile)
-    s.sendall(ch)
     return s
+
+def sendcmd(cmd, waitReply, *args):
+    s = getsocket()
+    f = s.makefile('rw')
+    f.write(cmd)
+    f.write(' ')
+    f.write(' '.join(map(str, args)))
+    f.write('\n')
+    f.flush()
+    if waitReply:
+        result, message = doubanfm.util.readReplyLine(f)
+        if 'OK' == result:
+            return
+        elif 'FAIL' == result or 'ERROR' == result:
+            print result, message
+        elif 'VALUE' == result:
+            value = doubanfm.util.readUtilEOFLine(f, message)
+            print value.rstrip()
+        else:
+            print 'UNKNOW REPLY %s %s' % (result, message)
+    s.close()
 
 
 if args.server:
-    socketfile = doubanfm.util.expand(doubanfm.util.socketfile)
-    if os.path.exists(socketfile):
-        print '服务已经启动，如果服务并未启动请执行 rm %s' % socketfile
+    if serverHasStart():
+        print '服务已经启动，如果服务并未启动请执行 rm %s' % doubanfm.util.socketfile
         sys.exit()
     play = True
     if args.server == 'unplay':
@@ -76,50 +97,27 @@ if args.server:
         # 
         # fm -s 2>/dev/null
         #
-        stdout = doubanfm.util.expand(doubanfm.util.stdout)
-        stderr = doubanfm.util.expand(doubanfm.util.stderr)
+        stdout = doubanfm.util.stdout
+        stderr = doubanfm.util.stderr
         doubanfm.util.initParent(stdout)
         doubanfm.util.initParent(stderr)
         sys.stdout = open(stdout, 'w')
         sys.stderr = open(stderr, 'w')
         import doubanfm.listening
         doubanfm.listening.start(play)
-elif args.info:
-    if serverHasStart():
-        s = send('i')
-        result = ''
-        while True:
-            temp = s.recv(1024)
-            if not temp:
-                break
-            result = result + temp
-        print result
-    else:
-        print >>sys.stderr, '服务尚未启动'
-elif args.list:
-    if serverHasStart():
-        s = send('l')
-        result = ''
-        while True:
-            temp = s.recv(1024)
-            if not temp:
-                break
-            result = result + temp
-        print result
-    else:
-        print >>sys.stderr, '服务尚未启动'
 elif args.next is not None:
     if serverHasStart():
         index = int(args.next)
-        index = min(255 , index)
         index = max(0 , index)
-        flag = 'n' + chr(index)
-        send(flag)
+        sendcmd('next', False, index)
     else:
         print >>sys.stderr, '服务尚未启动'
-elif args.flag:
+elif args.cmd:
     if serverHasStart():
-        send(args.flag)
+        if args.cmd == 'info' or args.cmd == 'list':
+            sendcmd(args.cmd, True)
+        else:
+            sendcmd(args.cmd, False)
     else:
         print >>sys.stderr, '服务尚未启动'
 else:

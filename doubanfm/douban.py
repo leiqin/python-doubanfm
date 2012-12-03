@@ -19,7 +19,7 @@ class Douban(object):
     url = 'http://douban.fm/j/mine/playlist'
 
     def __init__(self):
-        self.cookiefile = doubanfm.util.expand(doubanfm.util.cookiefile)
+        self.cookiefile = doubanfm.util.cookiefile
         policy = doubanfm.cookie.MyCookiePolicy()
         self.cookiejar = doubanfm.cookie.FirecookieCookieJar(self.cookiefile, policy=policy)
         if os.path.exists(self.cookiefile) and os.path.isfile(self.cookiefile):

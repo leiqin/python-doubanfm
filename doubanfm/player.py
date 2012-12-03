@@ -77,6 +77,7 @@ class Player(threading.Thread):
             pyglet.app.run()
         except:
             doubanfm.util.logerror()
+            raise
 
     def next(self, index=0):
         # 更新 self.song.time
