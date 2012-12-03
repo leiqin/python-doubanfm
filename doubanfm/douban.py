@@ -126,11 +126,15 @@ class Douban(object):
                 self._parse(res)
 
     def like(self, song):
+        if song.like:
+            return
         res = self._open(type='r', sid=song.sid, pt=song.time)
         self._parse(res)
         song.like = True
 
     def unlike(self, song):
+        if not song.like:
+            return
         res = self._open(type='u', sid=song.sid, pt=song.time)
         self._parse(res)
         song.like = False

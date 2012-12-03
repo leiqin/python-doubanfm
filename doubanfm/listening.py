@@ -116,20 +116,11 @@ class CmdHander(object):
         return True, ''
 
     def favourite(self, *args):
-        if not player.song.like:
-            player.like()
+        player.like()
         return True, ''
 
     def unFavourite(self, *args):
-        if player.song.like:
-            player.unlike()
-        return True, ''
-
-    def toggleFavourite(self, *args):
-        if player.song.like:
-            player.unlike()
-        else:
-            player.like()
+        player.unlike()
         return True, ''
 
     def info(self, *args):

@@ -37,8 +37,6 @@ parser.add_argument('-f', '--favourite', action='store_const',
         const='favourite', dest="cmd", help="喜欢")
 parser.add_argument('-u', '--unfavourite', action='store_const', 
         const='unFavourite', dest="cmd", help="不喜欢")
-parser.add_argument('-F', '--toggle-favourite', action='store_const', 
-        const='toggleFavourite', dest="cmd", help="喜欢/不喜欢")
 
 parser.add_argument('-i', '--info', action='store_const',
         const='info', dest='cmd', help="当前歌曲信息")
