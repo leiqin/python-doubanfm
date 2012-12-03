@@ -10,8 +10,8 @@ import pyglet.app
 import pyglet.clock
 from pyglet.media.avbin import AVbinException
 
-import lqfm.douban
-import lqfm.util
+import doubanfm.douban
+import doubanfm.util
 
 MAX_LIST_SIZE = 10
 
@@ -36,7 +36,7 @@ class Player(threading.Thread):
 
         self.songs = []
         self.lock = threading.Lock()
-        self.source = lqfm.douban.Douban()
+        self.source = doubanfm.douban.Douban()
         self.player = pyglet.media.Player()
         @self.player.event
         def on_eos():
@@ -76,7 +76,7 @@ class Player(threading.Thread):
         try:
             pyglet.app.run()
         except:
-            lqfm.util.logerror()
+            doubanfm.util.logerror()
 
     def next(self, index=0):
         # 更新 self.song.time
@@ -106,14 +106,14 @@ class Player(threading.Thread):
                 try:
                     return self._load(song)
                 except AVbinException:
-                    lqfm.util.logerror()
+                    doubanfm.util.logerror()
 
         while True:
             song = self.source.next()
             try:
                 return self._load(song)
             except AVbinException:
-                lqfm.util.logerror()
+                doubanfm.util.logerror()
 
     def _load(self, song):
         tmpfile = song.tmpfile

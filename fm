@@ -7,11 +7,11 @@ import os.path
 import sys
 import socket
 
-import lqfm.util
+import doubanfm.util
 
 parser = argparse.ArgumentParser(description="命令行的 豆瓣FM ，\
         可以使用 Firecookie(firefox 的插件) 导出的 cookie 文件，\
-        文件路径为 %s " % lqfm.util.cookiefile)
+        文件路径为 %s " % doubanfm.util.cookiefile)
 
 parser.add_argument('-s', '--server', action='store', 
         nargs='?', const='play', choices=('play', 'unplay'), dest='server', 
@@ -49,11 +49,11 @@ parser.add_argument('-x', '--exit', action='store_const',
 args = parser.parse_args()
 
 def serverHasStart():
-    socketfile = lqfm.util.expand(lqfm.util.socketfile)
+    socketfile = doubanfm.util.expand(doubanfm.util.socketfile)
     return os.path.exists(socketfile)
 
 def send(ch):
-    socketfile = lqfm.util.expand(lqfm.util.socketfile)
+    socketfile = doubanfm.util.expand(doubanfm.util.socketfile)
     s = socket.socket(socket.AF_UNIX)
     s.connect(socketfile)
     s.sendall(ch)
@@ -61,7 +61,7 @@ def send(ch):
 
 
 if args.server:
-    socketfile = lqfm.util.expand(lqfm.util.socketfile)
+    socketfile = doubanfm.util.expand(doubanfm.util.socketfile)
     if os.path.exists(socketfile):
         print '服务已经启动，如果服务并未启动请执行 rm %s' % socketfile
         sys.exit()
@@ -76,14 +76,14 @@ if args.server:
         # 
         # fm -s 2>/dev/null
         #
-        stdout = lqfm.util.expand(lqfm.util.stdout)
-        stderr = lqfm.util.expand(lqfm.util.stderr)
-        lqfm.util.initParent(stdout)
-        lqfm.util.initParent(stderr)
+        stdout = doubanfm.util.expand(doubanfm.util.stdout)
+        stderr = doubanfm.util.expand(doubanfm.util.stderr)
+        doubanfm.util.initParent(stdout)
+        doubanfm.util.initParent(stderr)
         sys.stdout = open(stdout, 'w')
         sys.stderr = open(stderr, 'w')
-        import lqfm.listening
-        lqfm.listening.start(play)
+        import doubanfm.listening
+        doubanfm.listening.start(play)
 elif args.info:
     if serverHasStart():
         s = send('i')

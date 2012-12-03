@@ -10,8 +10,8 @@ import os.path
 import time
 import StringIO
 
-import lqfm.cookie
-import lqfm.util
+import doubanfm.cookie
+import doubanfm.util
 
 class Douban(object):
 
@@ -19,9 +19,9 @@ class Douban(object):
     url = 'http://douban.fm/j/mine/playlist'
 
     def __init__(self):
-        self.cookiefile = lqfm.util.expand(lqfm.util.cookiefile)
-        policy = lqfm.cookie.MyCookiePolicy()
-        self.cookiejar = lqfm.cookie.FirecookieCookieJar(self.cookiefile, policy=policy)
+        self.cookiefile = doubanfm.util.expand(doubanfm.util.cookiefile)
+        policy = doubanfm.cookie.MyCookiePolicy()
+        self.cookiejar = doubanfm.cookie.FirecookieCookieJar(self.cookiefile, policy=policy)
         if os.path.exists(self.cookiefile) and os.path.isfile(self.cookiefile):
             # ignore_expires=True 表示加载过期的 cookie
             self.cookiejar.load(ignore_discard=True, ignore_expires=True)

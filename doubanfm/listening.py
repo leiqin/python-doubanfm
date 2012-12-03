@@ -6,10 +6,10 @@ import os.path
 import codecs
 import socket
 
-import lqfm.util
-from lqfm.player import Player
+import doubanfm.util
+from doubanfm.player import Player
 
-socketfile = lqfm.util.expand(lqfm.util.socketfile)
+socketfile = doubanfm.util.expand(doubanfm.util.socketfile)
 
 
 def start(play=True):
@@ -21,7 +21,7 @@ def start(play=True):
         player.start()
 
         s = socket.socket(socket.AF_UNIX)
-        lqfm.util.initParent(socketfile)
+        doubanfm.util.initParent(socketfile)
         s.bind(socketfile)
         s.listen(1)
 
@@ -73,7 +73,7 @@ def start(play=True):
                     con.sendall("\n")
             con.close()
     except:
-        lqfm.util.logerror()
+        doubanfm.util.logerror()
         raise
     finally:
         s.close()
