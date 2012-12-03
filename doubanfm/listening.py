@@ -12,14 +12,12 @@ socketfile = doubanfm.util.socketfile
 closed = False
 player = None
 
-def initPlayer(play=True):
+def initPlayer():
     global player
     player = Player()
-    if (play):
-        player.play()
     player.start()
 
-def start(play=True):
+def start():
 
     try:
         initPlayer(play)
@@ -68,9 +66,9 @@ def handler(con):
                             f.write('\n')
                     else:
                         f.write('FAIL %s\n' % inline(message))
-                except:
+                except Exception as e:
                     doubanfm.util.logerror()
-                    f.write('ERROR\n')
+                    f.write('ERROR %s\n' % inline(repr(e)))
             else:
                 f.write('ERROR unknow cmd %s\n' % cmd)
             f.flush()

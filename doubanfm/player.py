@@ -17,7 +17,6 @@ MAX_LIST_SIZE = 10
 
 class Player(threading.Thread):
 
-    playing = False
     song = None
 
     def __init__(self):
@@ -128,7 +127,6 @@ class Player(threading.Thread):
         if self.song and self.song != song:
             self._clearTmpfile()
 
-        self.playing = True
         self.song = song
         self.songs = []
         self.player.pause()
@@ -152,18 +150,16 @@ class Player(threading.Thread):
         thread.start()
 
     def pause(self):
-        if not self.playing:
+        if not self.player.playing:
             return
-        self.playing = False
         self.player.pause()
         song = self.song
         if not song.isLocal and not song.tmpfile:
             self._download(song)
 
     def play(self):
-        if self.playing:
+        if self.player.playing:
             return
-        self.playing = True
         song = self.song
         if song:
             if not song.isLocal and song.tmpfile:
@@ -171,9 +167,6 @@ class Player(threading.Thread):
                 self._playnext(song, song.time)
             else:
                 self.player.play()
-        else:
-            self._playnext()
-
 
     def list(self):
         result = []

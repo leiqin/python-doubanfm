@@ -13,12 +13,8 @@ parser = argparse.ArgumentParser(description="命令行的 豆瓣FM ，\
         可以使用 Firecookie(firefox 的插件) 导出的 cookie 文件，\
         文件路径为 %s " % doubanfm.util.cookiefile)
 
-parser.add_argument('-s', '--server', action='store', 
-        nargs='?', const='play', choices=('play', 'unplay'), dest='server', 
-        help="启动服务，play 表示开始播放，unplay  表示仅启动服务\
-                默认为 play")
-parser.add_argument('-U', '--unplay-server', action='store_const', 
-        const=2, dest='server', help="仅启动服务")
+parser.add_argument('-s', '--server', action='store_true', 
+        help="启动服务")
 
 parser.add_argument('-p', '--play', action='store_const', 
         const='play', dest="cmd", help="播放")
@@ -46,6 +42,9 @@ parser.add_argument('-l', '--list', action='store_const',
 parser.add_argument('-x', '--exit', action='store_const', 
         const='exit', dest="cmd", help="关闭服务")
 
+parser.add_argument('-r', '--reply', action='store_true',
+        help='等待应答信息，-i -l 本来就会等待应答')
+
 args = parser.parse_args()
 
 def serverHasStart():
@@ -69,7 +68,7 @@ def sendcmd(cmd, waitReply, *args):
     if waitReply:
         result, message = doubanfm.util.readReplyLine(f)
         if 'OK' == result:
-            return
+            print 'OK'
         elif 'FAIL' == result or 'ERROR' == result:
             print result, message
         elif 'VALUE' == result:
@@ -84,9 +83,6 @@ if args.server:
     if serverHasStart():
         print '服务已经启动，如果服务并未启动请执行 rm %s' % doubanfm.util.socketfile
         sys.exit()
-    play = True
-    if args.server == 'unplay':
-        play = False
     if not os.fork():
         # pyglet 使用 avbin 解析 mp3 文件，它是 c 的库
         # 它在解析 mp3 时会向标准错误输出一些信息
@@ -102,12 +98,12 @@ if args.server:
         sys.stdout = open(stdout, 'w')
         sys.stderr = open(stderr, 'w')
         import doubanfm.listening
-        doubanfm.listening.start(play)
+        doubanfm.listening.start()
 elif args.next is not None:
     if serverHasStart():
         index = int(args.next)
         index = max(0 , index)
-        sendcmd('next', False, index)
+        sendcmd('next', args.reply, index)
     else:
         print >>sys.stderr, '服务尚未启动'
 elif args.cmd:
@@ -115,7 +111,7 @@ elif args.cmd:
         if args.cmd == 'info' or args.cmd == 'list':
             sendcmd(args.cmd, True)
         else:
-            sendcmd(args.cmd, False)
+            sendcmd(args.cmd, args.reply)
     else:
         print >>sys.stderr, '服务尚未启动'
 else:
