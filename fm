@@ -8,10 +8,12 @@ import sys
 import socket
 
 import doubanfm.util
+from doubanfm.util import cookiefile, socketfile, stdout, stderr, \
+        initParent, readReplyLine, readUtilEOFLine
 
 parser = argparse.ArgumentParser(description="命令行的 豆瓣FM ，\
         可以使用 Firecookie(firefox 的插件) 导出的 cookie 文件，\
-        文件路径为 %s " % doubanfm.util.cookiefile)
+        文件路径为 %s " % cookiefile)
 
 parser.add_argument('-s', '--server', action='store_true', 
         help="启动服务")
@@ -48,11 +50,9 @@ parser.add_argument('-r', '--reply', action='store_true',
 args = parser.parse_args()
 
 def serverHasStart():
-    socketfile = doubanfm.util.socketfile
     return os.path.exists(socketfile)
 
 def getsocket():
-    socketfile = doubanfm.util.socketfile
     s = socket.socket(socket.AF_UNIX)
     s.connect(socketfile)
     return s
@@ -66,13 +66,16 @@ def sendcmd(cmd, waitReply, *args):
     f.write('\n')
     f.flush()
     if waitReply:
-        result, message = doubanfm.util.readReplyLine(f)
+        result, message = readReplyLine(f)
         if 'OK' == result:
-            print 'OK'
+            if message:
+                print message
+            else:
+                print 'OK'
         elif 'FAIL' == result or 'ERROR' == result:
             print result, message
         elif 'VALUE' == result:
-            value = doubanfm.util.readUtilEOFLine(f, message)
+            value = readUtilEOFLine(f, message)
             print value.rstrip()
         else:
             print 'UNKNOW REPLY %s %s' % (result, message)
@@ -81,7 +84,7 @@ def sendcmd(cmd, waitReply, *args):
 
 if args.server:
     if serverHasStart():
-        print '服务已经启动，如果服务并未启动请执行 rm %s' % doubanfm.util.socketfile
+        print '服务已经启动，如果服务并未启动请执行 rm %s' % socketfile
         sys.exit()
     if not os.fork():
         # pyglet 使用 avbin 解析 mp3 文件，它是 c 的库
@@ -91,10 +94,8 @@ if args.server:
         # 
         # fm -s 2>/dev/null
         #
-        stdout = doubanfm.util.stdout
-        stderr = doubanfm.util.stderr
-        doubanfm.util.initParent(stdout)
-        doubanfm.util.initParent(stderr)
+        initParent(stdout)
+        initParent(stderr)
         sys.stdout = open(stdout, 'w')
         sys.stderr = open(stderr, 'w')
         import doubanfm.listening

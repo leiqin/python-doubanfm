@@ -6,9 +6,10 @@ import os.path
 import socket
 
 import doubanfm.util
+from doubanfm.util import initParent, readCmdLine, socketfile, \
+        encode, inline, isInline, EOFflag
 from doubanfm.player import Player
 
-socketfile = doubanfm.util.socketfile
 closed = False
 player = None
 
@@ -23,7 +24,7 @@ def start():
         initPlayer()
 
         s = socket.socket(socket.AF_UNIX)
-        doubanfm.util.initParent(socketfile)
+        initParent(socketfile)
         s.bind(socketfile)
         s.listen(1)
 
@@ -47,7 +48,7 @@ def handler(con):
     try:
         f = con.makefile('rw')
         while not closed:
-            cmd, args = doubanfm.util.readCmdLine(f)
+            cmd, args = readCmdLine(f)
             if not cmd:
                 con.close()
                 return
@@ -59,16 +60,16 @@ def handler(con):
                         if not message:
                             f.write('OK\n')
                         else:
-                            f.write('VALUE %s\n' % doubanfm.util.EOFflag)
-                            f.write(message.encode('utf-8'))
+                            f.write('VALUE %s\n' % EOFflag)
+                            f.write(encode(message))
                             f.write('\n')
-                            f.write(doubanfm.util.EOFflag)
+                            f.write(EOFflag)
                             f.write('\n')
                     else:
-                        f.write('FAIL %s\n' % inline(message))
+                        f.write('FAIL %s\n' % inline(encode(message)))
                 except Exception as e:
                     doubanfm.util.logerror()
-                    f.write('ERROR %s\n' % inline(repr(e)))
+                    f.write('ERROR %s\n' % inline(encode(e)))
             else:
                 f.write('ERROR unknow cmd %s\n' % cmd)
             f.flush()
@@ -81,11 +82,6 @@ def handler(con):
             raise
     finally:
         con.close()
-
-def inline(message):
-    if not message:
-        return message
-    return message.replace('\n', ' ')
 
 class CmdHander(object):
 
@@ -126,12 +122,18 @@ class CmdHander(object):
         message = None
         if song:
             message = song.info()
-        return True, message
+        if message:
+            return True, message
+        else:
+            return True, '没有歌曲正在播放'
 
     def list(self, *args):
         songs = player.list()
         message = '\n'.join([song.oneline() for song in songs])
-        return True, message
+        if message:
+            return True, message
+        else:
+            return True, '歌曲列表为空'
 
     def exit(self, *args):
         global closed

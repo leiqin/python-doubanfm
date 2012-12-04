@@ -68,6 +68,24 @@ def readUtilEOFLine(file, EOFflag='EOF'):
             return ''.join(arr)
         arr.append(line)
 
+def encode(string):
+    if type(string) == str:
+        return string
+    elif type(string) == unicode:
+        return string.encode('utf-8')
+    else:
+        return encode(repr(string))
+
+def inline(message):
+    if not message:
+        return message
+    return message.replace('\n', ' ')
+
+def isInline(message):
+    if not message:
+        return True
+    return not '\n' in message
+
 def logerror():
     with open(errorfile, 'a') as f:
         f.write(time.strftime('%Y-%m-%d %H:%M:%S'))
