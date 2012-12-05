@@ -3,7 +3,6 @@
 
 import os
 import os.path
-import codecs
 import threading
 import traceback
 import time
@@ -88,11 +87,11 @@ def isInline(message):
     return not '\n' in message
 
 def logerror(message=None):
-    with codecs.open(errorfile, 'a', encoding='utf-8') as f:
+    with open(errorfile, 'a') as f:
         f.write(time.strftime('%Y-%m-%d %H:%M:%S'))
         f.write('\n')
         if message:
-            f.write(message)
+            f.write(encode(message))
             f.write('\n')
         traceback.print_exc(file=f)
         f.write('\n')
