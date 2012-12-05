@@ -46,6 +46,7 @@ class Douban(object):
             self.songs = songs
         except:
             util.logerror('url = %s\n data = %s' % (response.geturl(), data))
+            raise
         finally:
             response.close()
             
