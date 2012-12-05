@@ -10,8 +10,7 @@ import os.path
 import time
 import StringIO
 
-import doubanfm.cookie
-import doubanfm.util
+from doubanfm import util, cookie
 
 class Douban(object):
 
@@ -19,9 +18,9 @@ class Douban(object):
     url = 'http://douban.fm/j/mine/playlist'
 
     def __init__(self):
-        self.cookiefile = doubanfm.util.cookiefile
-        policy = doubanfm.cookie.MyCookiePolicy()
-        self.cookiejar = doubanfm.cookie.FirecookieCookieJar(self.cookiefile, policy=policy)
+        self.cookiefile = util.cookiefile
+        policy = cookie.MyCookiePolicy()
+        self.cookiejar = cookie.FirecookieCookieJar(self.cookiefile, policy=policy)
         if os.path.exists(self.cookiefile) and os.path.isfile(self.cookiefile):
             # ignore_expires=True 表示加载过期的 cookie
             self.cookiejar.load(ignore_discard=True, ignore_expires=True)
@@ -30,6 +29,26 @@ class Douban(object):
         self.opener = urllib2.build_opener(cookieHandler)
         self.song = None
         self.songs = []
+
+    def notifyDouban(self, *args, **kargs):
+        '''通知豆瓣FM，不处理结果，参数同 _open()'''
+        response = self._open(*args, **kargs)
+        response.close()
+
+    def updateSongs(self, *args, **kargs):
+        '''通知豆瓣FM，处理结果，更新歌曲列表，参数同 _open()'''
+        try:
+            response = self._open(*args, **kargs)
+            data = response.read()
+            response.close()
+            j = json.loads(data)
+            songs = map(self._buildSong , j['song'])
+            self.songs = songs
+        except:
+            util.logerror('url = %s\n data = %s' % (response.url, data))
+        finally:
+            response.close()
+            
 
     def _open(self, type='n', sid=None, channel=0, pt=None):
         params = {}
@@ -44,14 +63,9 @@ class Douban(object):
         url = self.url
         if params:
             url = ''.join([url, '?', urllib.urlencode(params)])
-        f = self.opener.open(url)
-        return f
+        response = self.opener.open(url)
+        return response
 
-    def _parse(self, response):
-        j = json.load(response)
-        songs = map(self._buildSong , j['song'])
-        self.songs = songs
-    
     def _buildSong(self, data):
         song = Song(data)
         song.source = self
@@ -68,12 +82,10 @@ class Douban(object):
             pass
         elif self.song.time >= self.song.duration:
             # reach end
-            res = self._open(type='e', sid=self.song.sid, pt=self.song.time)
-            res.close()
+            self.notifyDouban(type='e', sid=self.song.sid, pt=self.song.time)
         else:
             # hand
-            res = self._open(type='s', sid=self.song.sid, pt=self.song.time)
-            self._parse(res)
+            self.updateSongs(type='s', sid=self.song.sid, pt=self.song.time)
 
         self._checksongs()
         self.song = self.songs.pop(0)
@@ -93,13 +105,11 @@ class Douban(object):
             pass
         elif self.song.time >= self.song.duration:
             # reach end
-            res = self._open(type='e', sid=self.song.sid, pt=self.song.time)
-            res.close()
+            self.notifyDouban(type='e', sid=self.song.sid, pt=self.song.time)
         else:
             # hand
-            res = self._open(type='s', sid=self.song.sid, pt=self.song.time)
             # 不更新列表
-            res.close()
+            self.notifyDouban(type='s', sid=self.song.sid, pt=self.song.time)
 
         self.song = song
         self.skip(song)
@@ -119,24 +129,20 @@ class Douban(object):
     def _checksongs(self):
         if not self.songs:
             if self.song:
-                res = self._open(type='p', sid=self.song.sid, pt=0)
-                self._parse(res)
+                self.updateSongs(type='p', sid=self.song.sid, pt=0)
             else:
-                res = self._open()
-                self._parse(res)
+                self.updateSongs()
 
     def like(self, song):
         if song.like:
             return
-        res = self._open(type='r', sid=song.sid, pt=song.time)
-        self._parse(res)
+        self.updateSongs(type='r', sid=song.sid, pt=song.time)
         song.like = True
 
     def unlike(self, song):
         if not song.like:
             return
-        res = self._open(type='u', sid=song.sid, pt=song.time)
-        self._parse(res)
+        self.updateSongs(type='u', sid=song.sid, pt=song.time)
         song.like = False
 
     def close(self):
