@@ -11,10 +11,10 @@ import pyglet.clock
 from pyglet.media.avbin import AVbinException
 import logging
 
-logger = logging.getLogger(__name__)
-
 import doubanfm.douban
 import doubanfm.util
+
+logger = logging.getLogger(__name__)
 
 MAX_LIST_SIZE = 10
 MAX_WAIT_TIME = 1024
@@ -147,8 +147,8 @@ class Player(threading.Thread):
         return song
 
     def _play(self, song, seek=None):
-        logger.info('播放歌曲 %s', song.oneline())
         with self.condition:
+            logger.info(u'播放歌曲 %s', song.oneline())
             if self.song and self.song != song:
                 self._clearTmpfile()
                 self.song.mp3source = None
@@ -169,7 +169,7 @@ class Player(threading.Thread):
             self._play(song, seek)
 
     def _download(self, song):
-        logger.info('下载歌曲 %s', song.url)
+        logger.info(u'下载歌曲 %s', song.url)
         thread = DownloadFile(song)
         thread.start()
 
