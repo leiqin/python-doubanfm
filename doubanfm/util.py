@@ -7,8 +7,11 @@ import threading
 import traceback
 import time
 import sys
+import logging
 
-errorfile = os.path.expanduser("~/.cache/python-doubanfm/error")
+logger = logging.getLogger(__name__)
+
+logfile = os.path.expanduser("~/.cache/python-doubanfm/doubanfm.log")
 cookiefile = os.path.expanduser("~/.cache/python-doubanfm/cookies.txt")
 
 socketfile = os.path.expandvars("/tmp/python-doubanfm/$USER/socket")
@@ -85,16 +88,6 @@ def isInline(message):
     if not message:
         return True
     return not '\n' in message
-
-def logerror(message=None):
-    with open(errorfile, 'a') as f:
-        f.write(time.strftime('%Y-%m-%d %H:%M:%S'))
-        f.write('\n')
-        if message:
-            f.write(encode(message))
-            f.write('\n')
-        traceback.print_exc(file=f)
-        f.write('\n')
 
 if __name__ == '__main__':
     print stdout

@@ -9,8 +9,11 @@ import os
 import os.path
 import time
 import StringIO
+import logging
 
 from doubanfm import util, cookie
+
+logger = logging.getLogger(__name__)
 
 class Douban(object):
 
@@ -45,7 +48,7 @@ class Douban(object):
             songs = map(self._buildSong , j['song'])
             self.songs = songs
         except:
-            util.logerror('url = %s\n data = %s' % (response.geturl(), data))
+            logger.exception('解析歌曲列表异常\nurl = %s\ndata = %s', response,geturl(), data)
             raise
         finally:
             response.close()
@@ -64,6 +67,7 @@ class Douban(object):
         url = self.url
         if params:
             url = ''.join([url, '?', urllib.urlencode(params)])
+        logger.info('请求URL %s', url)
         response = self.opener.open(url)
         return response
 

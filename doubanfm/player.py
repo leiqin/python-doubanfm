@@ -9,6 +9,9 @@ import urllib2
 import pyglet.app
 import pyglet.clock
 from pyglet.media.avbin import AVbinException
+import logging
+
+logger = logging.getLogger(__name__)
 
 import doubanfm.douban
 import doubanfm.util
@@ -58,7 +61,7 @@ class Player(threading.Thread):
                         self._playnext()
                         break
                     except urllib2.URLError:
-                        doubanfm.util.logerror()
+                        logger.exception('获取下一首歌曲时，网络访问异常')
                         self.condition.wait(waitTime)
                         if waitTime < MAX_WAIT_TIME:
                             waitTime = waitTime * 2
@@ -94,7 +97,7 @@ class Player(threading.Thread):
         try:
             pyglet.app.run()
         except:
-            doubanfm.util.logerror()
+            logger.exception('pyglet.app.run() 发生异常')
             raise
 
     def next(self, index=0):
@@ -126,14 +129,14 @@ class Player(threading.Thread):
                 try:
                     return self._load(song)
                 except AVbinException:
-                    doubanfm.util.logerror()
+                    logger.exception('AVbin 加载歌曲文件异常')
 
         while True:
             song = self.source.next()
             try:
                 return self._load(song)
             except AVbinException:
-                doubanfm.util.logerror()
+                logger.exception('AVbin 加载歌曲文件异常')
 
     def _load(self, song):
         tmpfile = song.tmpfile
@@ -144,6 +147,7 @@ class Player(threading.Thread):
         return song
 
     def _play(self, song, seek=None):
+        logger.info('播放歌曲 %s', song.oneline())
         with self.condition:
             if self.song and self.song != song:
                 self._clearTmpfile()
@@ -165,6 +169,7 @@ class Player(threading.Thread):
             self._play(song, seek)
 
     def _download(self, song):
+        logger.info('下载歌曲 %s', song.url)
         thread = DownloadFile(song)
         thread.start()
 

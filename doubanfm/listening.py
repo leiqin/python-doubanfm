@@ -4,25 +4,37 @@
 import os
 import os.path
 import socket
+import logging
+import logging.handlers
 
 import doubanfm.util
 from doubanfm.util import initParent, readCmdLine, socketfile, \
-        encode, inline, isInline, EOFflag
+        encode, inline, isInline, EOFflag, logfile
 from doubanfm.player import Player
+
+logger = logging.getLogger(__name__)
 
 closed = False
 player = None
 
-def initPlayer():
+def init():
     global player
     player = Player()
     player.start()
+    root = logging.getLogger()
+    handler = logging.handlers.TimedRotatingFileHandler(logfile,
+            when='d', interval=1, backupCount=7)
+    handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-8s <%(name)s> %(message)s'))
+    root.addHandler(handler)
+    root.setLevel(logging.INFO)
+    
 
 def start():
 
     try:
-        initPlayer()
+        init()
 
+        logger.info('启动服务')
         s = socket.socket(socket.AF_UNIX)
         initParent(socketfile)
         s.bind(socketfile)
@@ -32,7 +44,7 @@ def start():
             con, add = s.accept()
             handler(con)
     except:
-        doubanfm.util.logerror()
+        logger.exception('处理命令时发生异常')
         raise
     finally:
         s.close()
@@ -52,6 +64,7 @@ def handler(con):
             if not cmd:
                 con.close()
                 return
+            logger.info('处理命令 %s', cmd)
             if hasattr(cmdHandler, cmd):
                 m = getattr(cmdHandler, cmd)
                 try:
@@ -68,7 +81,7 @@ def handler(con):
                     else:
                         f.write('FAIL %s\n' % inline(encode(message)))
                 except Exception as e:
-                    doubanfm.util.logerror()
+                    logger.exception('处理命令异常 %s %s', cmd, ' '.join(args))
                     f.write('ERROR %s\n' % inline(encode(e)))
             else:
                 f.write('ERROR unknow cmd %s\n' % cmd)
