@@ -64,7 +64,7 @@ def handler(con):
             if not cmd:
                 con.close()
                 return
-            logger.info('处理命令 %s', cmd)
+            logger.info('处理命令 %s %s', cmd, args)
             if hasattr(cmdHandler, cmd):
                 m = getattr(cmdHandler, cmd)
                 try:
@@ -81,7 +81,7 @@ def handler(con):
                     else:
                         f.write('FAIL %s\n' % inline(encode(message)))
                 except Exception as e:
-                    logger.exception('处理命令异常 %s %s', cmd, ' '.join(args))
+                    logger.exception('处理命令异常 %s %s', cmd, args)
                     f.write('ERROR %s\n' % inline(encode(e)))
             else:
                 f.write('ERROR unknow cmd %s\n' % cmd)
