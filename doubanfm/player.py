@@ -11,8 +11,7 @@ import pyglet.clock
 from pyglet.media.avbin import AVbinException
 import logging
 
-import doubanfm.douban
-import doubanfm.util
+import douban
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +39,7 @@ class Player(threading.Thread):
 
         self.songs = []
         self.condition = threading.Condition()
-        self.source = doubanfm.douban.Douban()
+        self.source = douban.Douban()
         self.player = pyglet.media.Player()
         @self.player.event
         def on_eos():

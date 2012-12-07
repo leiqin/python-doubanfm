@@ -11,7 +11,7 @@ import time
 import StringIO
 import logging
 
-from doubanfm import util, cookie
+import util, cookie
 
 logger = logging.getLogger(__name__)
 

@@ -7,10 +7,9 @@ import socket
 import logging
 import logging.handlers
 
-import doubanfm.util
-from doubanfm.util import initParent, readCmdLine, socketfile, \
+from util import initParent, readCmdLine, socketfile, \
         encode, inline, isInline, EOFflag, logfile
-from doubanfm.player import Player
+from player import Player
 
 logger = logging.getLogger(__name__)
 
