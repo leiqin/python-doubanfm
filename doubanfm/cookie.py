@@ -1,7 +1,7 @@
 # copy from _MozillaCookieJar.py
 # encoding=utf-8
 
-import re, time
+import time
 import cookielib
 
 from cookielib import (_warn_unhandled_exception, FileCookieJar, LoadError,

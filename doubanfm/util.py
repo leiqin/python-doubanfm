@@ -3,10 +3,6 @@
 
 import os
 import os.path
-import threading
-import traceback
-import time
-import sys
 import logging
 
 logger = logging.getLogger(__name__)

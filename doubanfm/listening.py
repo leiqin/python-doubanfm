@@ -8,7 +8,7 @@ import logging
 import logging.handlers
 
 from util import initParent, readCmdLine, socketfile, \
-        encode, inline, isInline, EOFflag, logfile
+        encode, inline, EOFflag, logfile
 from player import Player
 
 logger = logging.getLogger(__name__)
