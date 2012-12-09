@@ -3,7 +3,7 @@
 
 from distutils.core import setup
 
-version = '2.3'
+version = '2.4'
 
 setup(name='python-doubanfm',
       version=version,
