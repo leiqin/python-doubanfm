@@ -48,7 +48,7 @@ class Douban(object):
             songs = map(self._buildSong , j['song'])
             self.songs = songs
         except:
-            logger.exception(u'解析歌曲列表异常\nurl = %s\ndata = %s', response,geturl(), data)
+            logger.exception(u'解析歌曲列表异常\nurl = %s\ndata = %s', response.geturl(), data)
             raise
         finally:
             response.close()
