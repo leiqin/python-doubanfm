@@ -68,12 +68,23 @@ def readUtilEOFLine(file, EOFflag='EOF'):
         arr.append(line)
 
 def encode(string):
+    if not string:
+        return string
     if type(string) == str:
         return string
     elif type(string) == unicode:
         return string.encode('utf-8')
     else:
         return encode(repr(string))
+
+def decode(string):
+    if not string:
+        return string
+    if type(string) == str:
+        return string.decode('utf-8')
+    else:
+        return string
+
 
 def inline(message):
     if not message:

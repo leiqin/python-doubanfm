@@ -47,7 +47,8 @@ class Douban(object):
             songs = map(self._buildSong , j['song'])
             self.songs = songs
         except:
-            logger.exception(u'解析歌曲列表异常\nurl = %s\ndata = %s', response.geturl(), data)
+            logger.exception(u'解析歌曲列表异常\nurl = %s\ndata = %s',
+                    util.decode(response.geturl()), util.decode(data))
             raise
         finally:
             response.close()
@@ -66,7 +67,7 @@ class Douban(object):
         url = self.url
         if params:
             url = ''.join([url, '?', urllib.urlencode(params)])
-        logger.info(u'请求URL %s', url)
+        logger.info(u'请求URL %s', util.decode(url))
         response = self.opener.open(url)
         return response
 
