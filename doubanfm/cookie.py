@@ -1,5 +1,5 @@
 # copy from _MozillaCookieJar.py
-# encoding=utf-8
+# -*- coding: utf-8 -*-
 
 import time
 import cookielib
