@@ -7,7 +7,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-logfile = os.path.expanduser("~/.cache/python-doubanfm/doubanfm.log")
 cookiefile = os.path.expanduser("~/.cache/python-doubanfm/cookies.txt")
 
 socketfile = os.path.expandvars("/tmp/python-doubanfm/$USER/socket")
@@ -18,6 +17,10 @@ EOFflag = 'EOF'
 
 def initParent(filepath):
     dirname = os.path.dirname(filepath)
+    if not os.path.isdir(dirname):
+        os.makedirs(dirname)
+
+def initDir(dirname):
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
 

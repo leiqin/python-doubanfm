@@ -8,8 +8,9 @@ import logging
 import logging.handlers
 
 from util import initParent, readCmdLine, socketfile, \
-        encode, inline, EOFflag, logfile
+        encode, inline, EOFflag
 from player import Player
+import config
 
 logger = logging.getLogger(__name__)
 
@@ -17,16 +18,11 @@ closed = False
 player = None
 
 def init():
+    config.init()
+    config.load()
     global player
     player = Player()
     player.start()
-    root = logging.getLogger()
-    handler = logging.handlers.TimedRotatingFileHandler(logfile,
-            when='d', interval=1, backupCount=7)
-    handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)-8s <%(name)s> %(message)s'))
-    root.addHandler(handler)
-    root.setLevel(logging.INFO)
-    
 
 def start():
 
