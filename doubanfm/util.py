@@ -7,6 +7,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+configdir = '~/.config/python-doubanfm'
+cachedir = '~/.cache/python-doubanfm'
 cookiefile = os.path.expanduser("~/.cache/python-doubanfm/cookies.txt")
 
 socketfile = os.path.expandvars("/tmp/python-doubanfm/$USER/socket")

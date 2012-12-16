@@ -5,10 +5,14 @@ import os.path, logging.config
 
 import util
 
-logconf = os.path.expanduser('~/.config/python-doubanfm/logging.conf')
+configdir = os.path.expanduser(util.configdir)
+cachedir = os.path.expanduser(util.cachedir)
+logconf = os.path.join(configdir, 'logging.conf')
 
 def init():
-    util.initDir(os.path.expanduser('~/.cache/python-doubanfm'))
+    util.initDir(configdir)
+    util.initDir(cachedir)
+
     if os.path.exists(logconf):
         return
     util.initParent(logconf)
@@ -17,10 +21,13 @@ def init():
     with open(defaultconf) as dc:
         with open(logconf, 'w') as lc:
             data = dc.read()
-            home = os.path.expanduser('~')
-            data = data.replace('~', home)
             lc.write(data)
 
 def load():
-    logging.config.fileConfig(logconf,disable_existing_loggers=False)
+    default = {
+            'home' : os.path.expanduser('~'),
+            'configdir' : configdir,
+            'cachedir' : cachedir,
+            }
+    logging.config.fileConfig(logconf, default, False)
 
