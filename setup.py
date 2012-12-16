@@ -15,6 +15,7 @@ setup(name='python-doubanfm',
       author_email='leiqin2010@gmail.com',
       url='https://github.com/leiqin/python-doubanfm',
       packages=['doubanfm'],
+      package_data={'doubanfm': ['*.conf']},
       scripts=['fm'],
       license='GPL-3+',
       )
