@@ -12,7 +12,7 @@ import pyglet.clock
 from pyglet.media.avbin import AVbinException
 import logging
 
-import douban, util
+import util
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class Player(threading.Thread):
 
     song = None
 
-    def __init__(self):
+    def __init__(self, source):
         pass
         # 由于 pyglet.media 在导入后即便什么也没做
         # 也会在退出时出现警告：
@@ -40,7 +40,7 @@ class Player(threading.Thread):
 
         self.songs = []
         self.condition = threading.Condition()
-        self.source = douban.Douban()
+        self.source = source
         self.player = pyglet.media.Player()
         @self.player.event
         def on_eos():
@@ -110,15 +110,15 @@ class Player(threading.Thread):
                 self._playnext()
             elif index > len(songs):
                 for song in songs:
-                    song.source.skip(song)
+                    self.source.skip(song)
                 self._playnext()
             else:
                 while index > 1:
                     song = songs.pop(0)
-                    song.source.skip(song)
+                    self.source.skip(song)
                     index = index - 1
                 song = songs.pop(0)
-                song.source.select(song)
+                self.source.select(song)
                 self._playnext(song)
         
     def _next(self, song=None):

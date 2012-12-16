@@ -10,11 +10,12 @@ import time
 import StringIO
 import logging
 
-import util, cookie
+from doubanfm import util, cookie
+import api
 
 logger = logging.getLogger(__name__)
 
-class Douban(object):
+class Douban(api.Source):
 
     # http://douban.fm/j/mine/playlist?type=e&sid=221320&channel=0&pt=213.4&from=mainsite&r=a2d009faac
     url = 'http://douban.fm/j/mine/playlist'
@@ -154,7 +155,7 @@ class Douban(object):
         self.cookiejar.save(ignore_discard=True, ignore_expires=True)
         
 
-class Song(object):
+class Song(api.Song):
 
     source = None
     time = 0

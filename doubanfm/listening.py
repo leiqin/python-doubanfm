@@ -10,7 +10,7 @@ import logging.handlers
 from util import initParent, readCmdLine, socketfile, \
         encode, inline, EOFflag
 from player import Player
-import config
+import config, source, source.douban
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,9 @@ def init():
     config.init()
     config.load()
     global player
-    player = Player()
+    doubanfm = source.douban.Douban()
+    sm = source.SimpleSourceManager(doubanfm)
+    player = Player(sm)
     player.start()
 
 def start():
