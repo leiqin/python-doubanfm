@@ -19,19 +19,27 @@ player = None
 
 def init():
     config.init()
-    config.load()
+    cp = config.load()
+    sources = config.buildSources(cp)
+    if not sources:
+        raise Exception, u'没有配置有效的歌曲源'
     global player
-    doubanfm = source.douban.Douban()
-    sm = source.SimpleSourceManager(doubanfm)
+    sm = source.SimpleSourceManager(sources)
     player = Player(sm)
     player.start()
+    saveCookieThread = config.SaveCookie()
+    saveCookieThread.start()
+
 
 def start():
-
     try:
         init()
+    except:
+        logger.exception(u'初始化时发生异常')
+        raise
 
-        logger.info('启动服务')
+    try:
+        logger.info(u'启动服务')
         s = socket.socket(socket.AF_UNIX)
         initParent(socketfile)
         s.bind(socketfile)
@@ -41,10 +49,11 @@ def start():
             con, add = s.accept()
             handler(con)
     except:
-        logger.exception('处理命令时发生异常')
+        logger.exception(u'处理命令时发生异常')
         raise
     finally:
-        s.close()
+        if s:
+            s.close()
         close()
 
 def close():
@@ -52,6 +61,7 @@ def close():
         os.remove(socketfile)
     if player:
         player.close()
+    config.close()
 
 def handler(con):
     try:

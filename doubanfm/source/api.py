@@ -30,3 +30,9 @@ class Song(object):
     isLocal = False
     tmpfile = None
     mp3source = None
+
+    def info(self):
+        raise NotImplementedError
+
+    def oneline(self):
+        raise NotImplementedError

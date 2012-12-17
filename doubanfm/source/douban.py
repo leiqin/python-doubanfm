@@ -20,14 +20,8 @@ class Douban(api.Source):
     # http://douban.fm/j/mine/playlist?type=e&sid=221320&channel=0&pt=213.4&from=mainsite&r=a2d009faac
     url = 'http://douban.fm/j/mine/playlist'
 
-    def __init__(self):
-        self.cookiefile = util.cookiefile
-        policy = cookie.MyCookiePolicy()
-        self.cookiejar = cookie.FirecookieCookieJar(self.cookiefile, policy=policy)
-        if os.path.exists(self.cookiefile) and os.path.isfile(self.cookiefile):
-            # ignore_expires=True 表示加载过期的 cookie
-            self.cookiejar.load(ignore_discard=True, ignore_expires=True)
-        self.lastSaveCookieTime = time.time()
+    def __init__(self, config):
+        self.cookiejar = config.getCookiejar()
         cookieHandler = urllib2.HTTPCookieProcessor(self.cookiejar)
         self.opener = urllib2.build_opener(cookieHandler)
         self.song = None
@@ -78,11 +72,6 @@ class Douban(api.Source):
         return song
 
     def next(self):
-        # 定时保存 cookie
-        if time.time() - self.lastSaveCookieTime > 3600:
-            self.cookiejar.save(ignore_discard=True, ignore_expires=True)
-            self.lastSaveCookieTime = time.time()
-
         if not self.song:
             # new
             pass
@@ -152,7 +141,7 @@ class Douban(api.Source):
         song.like = False
 
     def close(self):
-        self.cookiejar.save(ignore_discard=True, ignore_expires=True)
+        pass
         
 
 class Song(api.Song):
