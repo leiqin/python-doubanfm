@@ -4,13 +4,10 @@
 import urllib
 import urllib2
 import json
-import os
-import os.path
-import time
 import StringIO
 import logging
 
-from doubanfm import util, cookie
+from doubanfm import util
 import api
 
 logger = logging.getLogger(__name__)
@@ -34,19 +31,28 @@ class Douban(api.Source):
 
     def updateSongs(self, *args, **kargs):
         '''通知豆瓣FM，处理结果，更新歌曲列表，参数同 _open()'''
-        try:
-            response = self._open(*args, **kargs)
-            data = response.read()
-            response.close()
-            j = json.loads(data)
-            songs = map(self._buildSong , j['song'])
-            self.songs = songs
-        except:
-            logger.exception(u'解析歌曲列表异常\nurl = %s\ndata = %s',
-                    util.decode(response.geturl()), util.decode(data))
-            raise
-        finally:
-            response.close()
+        while True:
+            try:
+                response = self._open(*args, **kargs)
+                data = response.read()
+                response.close()
+                j = json.loads(data)
+                songs = map(self._buildSong , j['song'])
+                self.songs = songs
+                return
+            except UnicodeDecodeError:
+                # 有时候 json 会有不是 utf-8 的字符
+                logger.debug(u'解析歌曲列表 JSON 异常 url = %s', util.decode(response.geturl()))
+                logger.debug(response.headers)
+                logger.debug(data)
+                continue
+            except:
+                logger.exception(u'解析歌曲列表异常 url = %s', util.decode(response.geturl()))
+                logger.error(response.headers)
+                logger.error(data)
+                raise
+            finally:
+                response.close()
             
 
     def _open(self, type='n', sid=None, channel=0, pt=None):
