@@ -188,7 +188,8 @@ class Song(api.Song):
         output.write('Album     : %s\n' % self.album)
         if self.publicTime:
             output.write('Public    : %s\n' % self.publicTime)
-        output.write(u'Source    : %s\n' % u'豆瓣FM')
+        if self.source:
+            output.write(u'Source    : %s\n' % u'豆瓣FM')
         if self.time and self.duration:
             output.write('Time      : %.1f\n' % self.time)
             output.write('Duration  : %.1f\n' % self.duration)

@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 import api
 from doubanfm import config
+
+logger = logging.getLogger(__name__)
 
 class SimpleSourceManager(api.Source):
 
@@ -25,7 +29,7 @@ class SimpleSourceManager(api.Source):
             result.extend(temp)
             if size is not None and len(result) >= size:
                 result = result[:size]
-                return result
+        return result
 
     def skip(self, song):
         song.source.skip(song)

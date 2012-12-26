@@ -14,6 +14,9 @@ class Source(object):
     def select(self, song):
         pass
 
+    def close(self):
+        pass
+
 class Song(object):
 
     source = None
