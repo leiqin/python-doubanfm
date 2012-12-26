@@ -139,10 +139,7 @@ class Player(threading.Thread):
                 logger.exception('AVbin 加载歌曲文件异常')
 
     def _load(self, song):
-        tmpfile = song.tmpfile
-        song.mp3source = pyglet.media.load(tmpfile or song.file or song.url)
-        if tmpfile or song.file:
-            song.isLocal = True
+        song.mp3source = pyglet.media.load(song.file or song.url)
         song.duration = song.mp3source.duration
         return song
 
@@ -179,7 +176,7 @@ class Player(threading.Thread):
                 return
             self.player.pause()
             song = self.song
-            if not song.isLocal and not song.tmpfile:
+            if not song.file and not song.tmpfile:
                 self._download(song)
 
     def play(self):
@@ -188,7 +185,7 @@ class Player(threading.Thread):
                 return
             song = self.song
             if song:
-                if not song.isLocal and song.tmpfile:
+                if song.tmpfile and song.file:
                     song = self._load(song)
                     self._playnext(song, song.time)
                 else:
@@ -262,6 +259,7 @@ class DownloadFile(threading.Thread):
     def run(self):
         url = self.song.url
         fd, tmpfile = tempfile.mkstemp('.mp3')
+        self.song.tmpfile = tmpfile
         respose = urllib2.urlopen(url)
         while True:
             data = respose.read(4096)
@@ -270,7 +268,7 @@ class DownloadFile(threading.Thread):
             os.write(fd, data)
         respose.close()
         os.close(fd)
-        self.song.tmpfile = tmpfile
+        self.song.file = tmpfile
 
 # 这一行代码是必需的
 # pyglet 是由 pyglet.app.run() 进行实际的播放
