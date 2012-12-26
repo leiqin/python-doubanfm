@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import api
+from doubanfm import config
 
 class SimpleSourceManager(api.Source):
 
-    def __init__(self, sources):
-        if sources:
-            if isinstance(sources, api.Source):
-                self.sources = [sources]
-            else:
-                self.sources = sources
-        else:
-            self.sources = []
+    def __init__(self, cp):
+        self.cp = cp
+        sources = config.buildSources(cp)
+        if not sources:
+            raise Exception, u'没有配置有效的歌曲源'
+        self.sources = sources
 
     def next(self):
         for source in self.sources:
@@ -35,5 +34,6 @@ class SimpleSourceManager(api.Source):
         song.source.select(song)
 
     def close(self):
+        config.saveCookie()
         for source in self.sources:
             source.close()

@@ -101,5 +101,20 @@ def isInline(message):
         return True
     return not '\n' in message
 
+def resolve(name):
+    """Resolve a dotted name to a global object."""
+    # copy from logging.config
+    name = name.split('.')
+    used = name.pop(0)
+    found = __import__(used)
+    for n in name:
+        used = used + '.' + n
+        try:
+            found = getattr(found, n)
+        except AttributeError:
+            __import__(used)
+            found = getattr(found, n)
+    return found
+
 if __name__ == '__main__':
     print stdout

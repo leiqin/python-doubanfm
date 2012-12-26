@@ -8,7 +8,7 @@ import logging
 import logging.handlers
 
 from util import initParent, readCmdLine, socketfile, \
-        encode, inline, EOFflag
+        encode, inline, EOFflag, resolve
 from player import Player
 import config, source, source.douban
 
@@ -20,11 +20,14 @@ player = None
 def init():
     config.init()
     cp = config.load()
-    sources = config.buildSources(cp)
-    if not sources:
-        raise Exception, u'没有配置有效的歌曲源'
+    if cp.has_option('global', 'source_manager'):
+        cla = cp.get('global', 'source_manager')
+        logger.debug(cla)
+        cla = resolve(cla)
+    else:
+        cla = source.SimpleSourceManager
+    sm = cla(cp) 
     global player
-    sm = source.SimpleSourceManager(sources)
     player = Player(sm)
     player.start()
     saveCookieThread = config.SaveCookie()
@@ -61,7 +64,6 @@ def close():
         os.remove(socketfile)
     if player:
         player.close()
-    config.close()
 
 def handler(con):
     try:
@@ -75,18 +77,15 @@ def handler(con):
             if hasattr(cmdHandler, cmd):
                 m = getattr(cmdHandler, cmd)
                 try:
-                    result, message = m(*args)
-                    if result:
-                        if not message:
-                            f.write('OK\n')
-                        else:
-                            f.write('VALUE %s\n' % EOFflag)
-                            f.write(encode(message))
-                            f.write('\n')
-                            f.write(EOFflag)
-                            f.write('\n')
+                    message = m(*args)
+                    if not message:
+                        f.write('OK\n')
                     else:
-                        f.write('FAIL %s\n' % inline(encode(message)))
+                        f.write('VALUE %s\n' % EOFflag)
+                        f.write(encode(message))
+                        f.write('\n')
+                        f.write(EOFflag)
+                        f.write('\n')
                 except Exception as e:
                     logger.exception(u'处理命令异常 %s %s', cmd, args)
                     f.write('ERROR %s\n' % inline(encode(e)))
@@ -110,32 +109,26 @@ class CmdHander(object):
         if args:
             index = int(args[0])
         player.next(index=index)
-        return True, ''
 
     def play(self, *args):
         if not player.playing:
             player.play()
-        return True, ''
 
     def pause(self, *args):
         if player.playing:
             player.pause()
-        return True, ''
 
     def togglePause(self, *args):
         if player.playing:
             player.pause()
         else:
             player.play()
-        return True, ''
 
     def favourite(self, *args):
         player.like()
-        return True, ''
 
     def unFavourite(self, *args):
         player.unlike()
-        return True, ''
 
     def info(self, *args):
         song = player.song
@@ -143,23 +136,22 @@ class CmdHander(object):
         if song:
             message = song.info()
         if message:
-            return True, message
+            return message
         else:
-            return True, '没有歌曲正在播放'
+            return u'没有歌曲正在播放'
 
     def list(self, *args):
         songs = player.list()
         message = '\n'.join([song.oneline() for song in songs])
         if message:
-            return True, message
+            return message
         else:
-            return True, '歌曲列表为空'
+            return u'歌曲列表为空'
 
     def exit(self, *args):
         global closed
         closed = True
         player.close()
-        return True, ''
 
 cmdHandler = CmdHander()
 

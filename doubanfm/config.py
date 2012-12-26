@@ -50,9 +50,6 @@ def load():
 
 cookiejars = {}
 
-def close():
-    saveCookie()
-
 def saveCookie():
     logger.debug(u'保存 Cookie')
     for cookiejar in cookiejars.values():
@@ -68,26 +65,11 @@ def buildSources(cp):
             continue
         cla = cp.get(name, 'class')
         logger.debug(u'创建歌曲源 %s ，class = %s', name, cla)
-        cla = _resolve(cla)
+        cla = util.resolve(cla)
         config = Config(cp, name)
         source = cla(config)
         result.append(source)
     return result
-
-def _resolve(name):
-    """Resolve a dotted name to a global object."""
-    # copy from logging.config
-    name = name.split('.')
-    used = name.pop(0)
-    found = __import__(used)
-    for n in name:
-        used = used + '.' + n
-        try:
-            found = getattr(found, n)
-        except AttributeError:
-            __import__(used)
-            found = getattr(found, n)
-    return found
 
 class Config(object):
 
@@ -126,7 +108,6 @@ class SaveCookie(threading.Thread):
     def __init__(self, interval=3600):
         threading.Thread.__init__(self)
         self.daemon = True
-        
         self.interval = interval
 
     def run(self):
