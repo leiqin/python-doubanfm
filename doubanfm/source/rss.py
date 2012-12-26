@@ -135,8 +135,8 @@ class Song(api.Song):
         if self.source:
             result.append('Source    : %s' % self.source.name)
         if self.time and self.duration:
-            result.append('Time      : %.1f' % self.time)
-            result.append('Duration  : %.1f' % self.duration)
+            result.append('Time      : %s' % util.showtime(self.time))
+            result.append('Duration  : %s' % util.showtime(self.duration))
         return '\n'.join(result)
 
     def oneline(self):

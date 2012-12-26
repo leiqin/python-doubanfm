@@ -101,6 +101,20 @@ def isInline(message):
         return True
     return not '\n' in message
 
+def showtime(second):
+    h = m = s = 0
+    s = int(second)
+    if s > 60:
+        m = s / 60
+        s = s % 60
+    if m > 60:
+        h = m / 60
+        m = m % 60
+    if h:
+        return '%d:%02d:%02d' % (h, m, s)
+    else:
+        return '%02d:%02d' % (m, s)
+
 def resolve(name):
     """Resolve a dotted name to a global object."""
     # copy from logging.config

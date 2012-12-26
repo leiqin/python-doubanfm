@@ -191,8 +191,8 @@ class Song(api.Song):
         if self.source:
             output.write(u'Source    : %s\n' % u'豆瓣FM')
         if self.time and self.duration:
-            output.write('Time      : %.1f\n' % self.time)
-            output.write('Duration  : %.1f\n' % self.duration)
+            output.write('Time      : %s\n' % util.showtime(self.time))
+            output.write('Duration  : %s\n' % util.showtime(self.duration))
         result = output.getvalue()
         output.close()
         return result
