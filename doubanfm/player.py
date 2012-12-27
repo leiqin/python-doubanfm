@@ -209,7 +209,7 @@ class Player(threading.Thread):
     def like(self):
         with self.condition:
             song = self.song
-            if hasattr(song.source, 'like'):
+            if song and hasattr(song.source, 'like'):
                 m = getattr(song.source, 'like')
                 m(song)
                 self.songs = []
@@ -217,7 +217,7 @@ class Player(threading.Thread):
     def unlike(self):
         with self.condition:
             song = self.song
-            if hasattr(song.source, 'unlike'):
+            if song and hasattr(song.source, 'unlike'):
                 m = getattr(song.source, 'unlike')
                 m(song)
                 self.songs = []
