@@ -227,6 +227,10 @@ class Player(threading.Thread):
         self._clearTmpfile()
         self.source.close()
 
+    def update(self):
+        if hasattr(self.source, 'update'):
+            self.source.update()
+
     def _clearTmpfile(self):
         song = self.song
         if not song:

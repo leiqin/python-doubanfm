@@ -148,6 +148,9 @@ class CmdHander(object):
         else:
             return u'歌曲列表为空'
 
+    def update(self, *args):
+        player.update()
+
     def exit(self, *args):
         global closed
         closed = True

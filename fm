@@ -44,6 +44,9 @@ parser.add_argument('-l', '--list', action='store_const',
 parser.add_argument('-x', '--exit', action='store_const', 
         const='exit', dest="cmd", help="关闭服务")
 
+parser.add_argument('-U', '--update', action='store_const',
+        const='update', dest='cmd', help='更新 RSS')
+
 parser.add_argument('-r', '--reply', action='store_true',
         help='等待应答信息，-i -l 本来就会等待应答')
 

@@ -37,6 +37,11 @@ class SimpleSourceManager(api.Source):
     def select(self, song):
         song.source.select(song)
 
+    def update(self):
+        for source in self.sources:
+            if hasattr(source, 'update'):
+                source.update()
+
     def close(self):
         config.saveCookie()
         for source in self.sources:

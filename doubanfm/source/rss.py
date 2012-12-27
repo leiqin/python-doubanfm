@@ -28,9 +28,13 @@ class RSS(api.Source):
         if os.path.exists(self.cur_file):
             with open(self.cur_file) as f:
                 self.cur_id = util.decode(f.read())
-        self.update()
+        self.updating = False
+        #self.update()
 
     def update(self):
+        if self.updating:
+            return
+        self.updating = True
         th = UpdateSongs(self)
         th.start()
 
@@ -89,13 +93,17 @@ class UpdateSongs(threading.Thread):
             with self.source.condition:
                 songs = UpdateSongs.parse(tree, self.source.cur_id)
                 if not songs:
+                    logger.debug(u'rss 中无内容 %s', rss)
                     return
                 if not self.source.cur_id:
                     songs = songs[-1:]
                 songs = map(self._setSource, songs)
                 self.source.songs = songs
+            logger.debug(u'更新完成 rss %s', rss)
         except:
-            logger.exception(u'更新 rss 出错 %s', rss)
+            logger.exception(u'更新出错 rss %s', rss)
+        finally:
+            self.source.updating = False
 
     def _setSource(self, song):
         song.source = self.source
