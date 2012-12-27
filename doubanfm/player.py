@@ -232,7 +232,7 @@ class Player(threading.Thread):
         if not song:
             return
         tmpfile = song.tmpfile
-        if tmpfile and os.path.exists(tmpfile):
+        if tmpfile and tmpfile != True and os.path.exists(tmpfile):
             os.remove(tmpfile)
         song.tmpfile = None
 
