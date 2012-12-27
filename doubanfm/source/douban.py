@@ -121,8 +121,6 @@ class Douban(api.Source):
             return list(self.songs)
         elif size <= 0:
             return []
-        elif size >= len(self.songs):
-            return list(self.songs)
         else:
             return self.songs[:size]
             

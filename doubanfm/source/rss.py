@@ -3,6 +3,7 @@
 import xml.etree.ElementTree as etree
 import threading, os.path, urllib2
 import logging
+from collections import OrderedDict
 
 import api
 from doubanfm import util, config
@@ -18,18 +19,22 @@ class RSS(api.Source):
             self.name = util.decode(name)
         else:
             self.name = self.config.name
-        self.condition = threading.Condition()
 
+        self.last_id = None
         self.cur_id = None
-        self.songs = []
+        self.songs = OrderedDict()
         self.cachedir = os.path.join(config.cachedir, self.config.name)
         util.initDir(self.cachedir)
         self.cur_file = os.path.join(self.cachedir, 'cur')
         if os.path.exists(self.cur_file):
             with open(self.cur_file) as f:
-                self.cur_id = util.decode(f.read())
+                self.cur_id = util.decode(f.read()).strip()
         self.updating = False
-        #self.update()
+        update_on_startup = False
+        if 'update_on_startup' in self.config:
+            update_on_startup = self.config.getboolean('update_on_startup')
+        if update_on_startup:
+            self.update()
 
     def update(self):
         if self.updating:
@@ -41,31 +46,28 @@ class RSS(api.Source):
     def next(self):
         if not self.songs:
             return None
-        with self.condition:
-            song = self.songs.pop(0)
-            self._cur(song)
-            return song
+        _, song = self.songs.popitem(last=False)
+        self._cur(song)
+        return song
 
     def list(self, size=None):
-        if not self.songs:
+        songs = self.songs.values()
+        if not songs:
             return []
-        if size is None or size <=0:
-            return list(self.songs)
-        elif size >= len(self.songs):
-            return list(self.songs)
+        if size is None:
+            return list(songs)
+        elif size <=0:
+            return []
         else:
-            return self.songs[:size]
+            return songs[:size]
 
     def skip(self, song):
-        try:
-            self.songs.remove(song)
-        except ValueError:
-            pass
+        if song.id in self.songs:
+            del self.songs[song.id]
 
     def select(self, song):
         self.skip(song)
-        with self.condition:
-            self._cur(song)
+        self._cur(song)
 
     def close(self):
         self._cur()
@@ -90,27 +92,24 @@ class UpdateSongs(threading.Thread):
             logger.info(u'更新 rss %s', rss)
             response = urllib2.urlopen(rss)
             tree = etree.parse(response)
-            with self.source.condition:
-                songs = UpdateSongs.parse(tree, self.source.cur_id)
-                if not songs:
-                    logger.debug(u'rss 中无内容 %s', rss)
-                    return
-                if not self.source.cur_id:
-                    songs = songs[-1:]
-                songs = map(self._setSource, songs)
-                self.source.songs = songs
+            songs = UpdateSongs.parse(tree, self.source.last_id or self.source.cur_id)
+            if not songs:
+                logger.debug(u'rss 中没有需要更新的内容 %s', rss)
+                return
+            if not self.source.last_id and not self.source.cur_id:
+                songs = songs[-1:]
+            for song in songs:
+                song.source = self.source
+                self.source.songs[song.id] = song
+            self.source.last_id = song.id
             logger.debug(u'更新完成 rss %s', rss)
         except:
             logger.exception(u'更新出错 rss %s', rss)
         finally:
             self.source.updating = False
 
-    def _setSource(self, song):
-        song.source = self.source
-        return song
-
     @staticmethod
-    def parse(tree, cur_id=None):
+    def parse(tree, last_id=None):
         songs = []
         for item in tree.findall('channel/item'):
             song = Song()
@@ -122,9 +121,9 @@ class UpdateSongs(threading.Thread):
             else:
                 continue
             song.title = item.find('title').text
-            song.id = item.find('guid').text
+            song.id = item.find('guid').text.strip()
             song.pubDate = item.find('pubDate').text
-            if cur_id and song.id == cur_id:
+            if last_id and song.id == last_id:
                 break
             songs.append(song)
         songs.reverse()

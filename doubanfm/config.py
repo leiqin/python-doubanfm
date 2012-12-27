@@ -77,12 +77,37 @@ class Config(object):
         self.cp = cp
         self.name = name
 
+    def __contains__(self, key):
+        return self.cp.has_option(self.name, key) or \
+                self.cp.has_option('common', key)
+
     def __getitem__(self, key):
         value = self.get(key)
         if value is None:
             return value
         else:
             raise KeyError, key
+
+    def getint(self, key):
+        if self.cp.has_option(self.name, key):
+            return self.cp.getint(self.name, key)
+        if self.cp.has_option('common', key):
+            return self.cp.getint('common', key)
+        return None
+
+    def getfloat(self, key):
+        if self.cp.has_option(self.name, key):
+            return self.cp.getfloat(self.name, key)
+        if self.cp.has_option('common', key):
+            return self.cp.getfloat('common', key)
+        return None
+
+    def getboolean(self, key):
+        if self.cp.has_option(self.name, key):
+            return self.cp.getboolean(self.name, key)
+        if self.cp.has_option('common', key):
+            return self.cp.getboolean('common', key)
+        return None
 
     def get(self, key):
         if self.cp.has_option(self.name, key):
