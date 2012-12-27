@@ -116,7 +116,6 @@ class UpdateSongs(threading.Thread):
             song.title = item.find('title').text
             song.id = item.find('guid').text
             song.pubDate = item.find('pubDate').text
-            logger.debug(song.info())
             if cur_id and song.id == cur_id:
                 break
             songs.append(song)

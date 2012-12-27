@@ -145,7 +145,7 @@ class Player(threading.Thread):
 
     def _play(self, song, seek=None):
         with self.condition:
-            logger.info(u'播放歌曲 %s', util.decode(song.oneline()))
+            logger.info(u'播放歌曲 %s (%d)', util.decode(song.oneline()), seek or 0)
             if self.song and self.song != song:
                 self._clearTmpfile()
                 self.song.mp3source = None
@@ -166,7 +166,7 @@ class Player(threading.Thread):
             self._play(song, seek)
 
     def _download(self, song):
-        logger.info(u'下载歌曲 %s', util.decode(song.url))
+        song.tmpfile = True
         thread = DownloadFile(song)
         thread.start()
 
@@ -186,6 +186,7 @@ class Player(threading.Thread):
             song = self.song
             if song:
                 if song.tmpfile and song.file:
+                    logger.debug(u'加载临时文件 <%s> %s', song.tmpfile, song.url)
                     song = self._load(song)
                     self._playnext(song, song.time)
                 else:
@@ -257,18 +258,27 @@ class DownloadFile(threading.Thread):
         self.song = song
 
     def run(self):
-        url = self.song.url
-        fd, tmpfile = tempfile.mkstemp('.mp3')
-        self.song.tmpfile = tmpfile
-        respose = urllib2.urlopen(url)
-        while True:
-            data = respose.read(4096)
-            if not data:
-                break
-            os.write(fd, data)
-        respose.close()
-        os.close(fd)
-        self.song.file = tmpfile
+        try:
+            url = self.song.url
+            logger.debug(u'下载歌曲 %s', util.decode(url))
+            suffix = util.getSuffix(url)
+            if suffix == '.m4a':
+                logger.debug(u'文件类型无法被 pyglet seek %s' % url)
+                return
+            fd, tmpfile = tempfile.mkstemp(suffix)
+            self.song.tmpfile = tmpfile
+            respose = urllib2.urlopen(url)
+            while True:
+                data = respose.read(4096)
+                if not data:
+                    break
+                os.write(fd, data)
+            respose.close()
+            os.close(fd)
+            self.song.file = tmpfile
+            logger.debug(u'下载完成 <%s> %s', tmpfile, url)
+        except:
+            logger.exception(u'下载文件出错 %s', url)
 
 # 这一行代码是必需的
 # pyglet 是由 pyglet.app.run() 进行实际的播放
@@ -303,6 +313,22 @@ pyglet.clock.schedule_interval_soft(lambda dt:None, 0.09)
 
 
 if __name__ == "__main__":
-    p = Player()
-    p.play()
+    import sys
+    import source.api
+    class Song(source.api.Song):
+
+        def __init__(self, file):
+            self.file = file
+
+        def info(self):
+            return self.file
+
+        def oneline(self):
+            return self.file
+    p = Player(None)
+    f = sys.argv[1]
+    seek = 0
+    if len(sys.argv) >= 3:
+        seek = int(sys.argv[2])
+    p._playnext(Song(sys.argv[1]), seek)
     p.run()

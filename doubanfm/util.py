@@ -130,5 +130,25 @@ def resolve(name):
             found = getattr(found, n)
     return found
 
+def getSuffix(url):
+    i = url.rfind('/')
+    if i == -1:
+        return ''
+    s = url[i+1:]
+    if not s:
+        return ''
+    i = s.find('?')
+    if i != -1:
+        s = s[:i]
+    i = s.find('#')
+    if i != -1:
+        s = s[:i]
+    if not s:
+        return ''
+    i = s.rfind('.')
+    if i == -1:
+        return ''
+    return s[i:]
+
 if __name__ == '__main__':
-    print stdout
+    print getSuffix('http://helloworld/abc.m4a?sfds=dsaf')
