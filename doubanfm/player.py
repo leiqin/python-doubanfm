@@ -271,13 +271,13 @@ class DownloadFile(threading.Thread):
                 return
             fd, tmpfile = tempfile.mkstemp(suffix)
             self.song.tmpfile = tmpfile
-            respose = urllib2.urlopen(url)
+            response = urllib2.urlopen(url)
             while True:
-                data = respose.read(4096)
+                data = response.read(4096)
                 if not data:
                     break
                 os.write(fd, data)
-            respose.close()
+            response.close()
             os.close(fd)
             self.song.file = tmpfile
             logger.debug(u'下载完成 <%s> %s', tmpfile, url)

@@ -145,7 +145,7 @@ class Douban(api.Source):
         song.like = False
 
     def close(self):
-        pass
+        self.opener.close()
         
 
 class Song(api.Song):
