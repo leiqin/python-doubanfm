@@ -7,7 +7,7 @@ import json
 import StringIO
 import logging
 
-from doubanfm import util
+from doubanfm import util, config
 import api
 
 logger = logging.getLogger(__name__)
@@ -33,6 +33,7 @@ class Douban(api.Source):
         '''通知豆瓣FM，处理结果，更新歌曲列表，参数同 _open()'''
         while True:
             try:
+                response = None
                 response = self._open(*args, **kargs)
                 data = response.read()
                 response.close()
@@ -52,7 +53,8 @@ class Douban(api.Source):
                 logger.error(data)
                 raise
             finally:
-                response.close()
+                if response:
+                    response.close()
             
 
     def _open(self, type='n', sid=None, channel=0, pt=None):
@@ -69,7 +71,7 @@ class Douban(api.Source):
         if params:
             url = ''.join([url, '?', urllib.urlencode(params)])
         logger.info(u'请求URL %s', util.decode(url))
-        response = self.opener.open(url)
+        response = self.opener.open(url, timeout=config.TIMEOUT)
         return response
 
     def _buildSong(self, data):

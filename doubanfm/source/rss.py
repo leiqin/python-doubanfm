@@ -164,7 +164,7 @@ class UpdateSongs(threading.Thread):
         try:
             rss = self.source.config.get('rss')
             logger.info(u'更新 rss %s', rss)
-            response = self.opener.open(rss)
+            response = self.opener.open(rss, timeout=config.TIMEOUT)
             tree = etree.parse(response)
             songs = UpdateSongs.parse(tree, self.source.last_id or self.source.cur_id)
             if not songs:
@@ -194,7 +194,7 @@ class UpdateSongs(threading.Thread):
         if not suffix:
             suffix = '.mp3'
         fd, path = tempfile.mkstemp(suffix, '', self.source.cachedir)
-        response = self.opener.open(song.url)
+        response = self.opener.open(song.url, timeout=config.TIMEOUT)
         while True:
             data = response.read(4096)
             if not data:

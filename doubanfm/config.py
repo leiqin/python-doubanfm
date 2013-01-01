@@ -11,6 +11,8 @@ import util, cookie
 
 logger = logging.getLogger(__name__)
 
+TIMEOUT = 30
+
 configdir = os.path.expanduser(util.configdir)
 cachedir = os.path.expanduser(util.cachedir)
 logconf = os.path.join(configdir, 'logging.conf')
