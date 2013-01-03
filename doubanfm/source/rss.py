@@ -11,6 +11,12 @@ from doubanfm import util, config
 logger = logging.getLogger(__name__)
 
 class RSS(api.Source):
+    '''
+    配置选项：
+        rss (必须) <string> RSS 源的网址
+        update_on_startup (可选) <boolean> 服务启动时更新
+        pre_download (可选) <boolean> 预下载，先下载，后播放
+    '''
 
     def __init__(self, conf):
         self.config = conf
