@@ -14,8 +14,11 @@ class RSS(api.Source):
     '''
     配置选项：
         rss (必须) <string> RSS 源的网址
+        name (可选) <string> 名称
         update_on_startup (可选) <boolean> 服务启动时更新
         pre_download (可选) <boolean> 预下载，先下载，后播放
+        proxy_enable (可选) <boolean> 是否使用代理
+        proxy (可选) <string> 代理，如：http://localhost:8118
     '''
 
     def __init__(self, conf):
@@ -43,6 +46,13 @@ class RSS(api.Source):
         self.loadCache()
         self.clearCache()
         self.saveCache()
+
+        self.proxy_enable = False
+        self.proxy = None
+        if 'proxy_enable' in self.config:
+            self.proxy_enable = self.config.getboolean('proxy_enable')
+        if 'proxy' in self.config:
+            self.proxy = self.config.get('proxy')
 
         self.updating = False
         update_on_startup = False
@@ -165,6 +175,9 @@ class UpdateSongs(threading.Thread):
         self.daemon = True
         self.source = source
         self.opener = urllib2.build_opener()
+        if source.proxy_enable and source.proxy:
+            logger.debug(u'使用代理 %s' % source.proxy)
+            self.opener.add_handler(urllib2.ProxyHandler({'http':source.proxy}))
 
     def run(self):
         try:
