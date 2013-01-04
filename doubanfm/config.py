@@ -68,16 +68,20 @@ def buildSources(cp):
         cla = cp.get(name, 'class')
         logger.debug(u'创建歌曲源 %s ，class = %s', name, cla)
         cla = util.resolve(cla)
-        config = Config(cp, name)
+        config = Config(name, cp)
         source = cla(config)
         result.append(source)
     return result
 
 class Config(object):
 
-    def __init__(self, cp, name):
-        self.cp = cp
+    def __init__(self, name, cp=None):
         self.name = name
+        if cp is None:
+            cp = ConfigParser.ConfigParser()
+            cp.add_section('common')
+            cp.add_section(name)
+        self.cp = cp
 
     def __contains__(self, key):
         return self.cp.has_option(self.name, key) or \
@@ -89,6 +93,9 @@ class Config(object):
             return value
         else:
             raise KeyError, key
+
+    def __setitem__(self, key, value):
+        self.set(key, value)
 
     def getint(self, key):
         if self.cp.has_option(self.name, key):
@@ -117,6 +124,17 @@ class Config(object):
         if self.cp.has_option('common', key):
             return self.cp.get('common', key)
         return None
+
+    def set(self, key, value):
+        if value is not None or type(value) != str or type(value) != unicode:
+            value = str(value)
+        self.cp.set(self.name, key, value)
+
+    def getName(self):
+        if 'name' in self:
+            return util.decode(self.get('name'))
+        else:
+            return self.name
 
     def getCookiejar(self):
         cookiefile = self.get('cookiefile')
