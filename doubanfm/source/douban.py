@@ -17,8 +17,8 @@ class Douban(api.Source):
     # http://douban.fm/j/mine/playlist?type=e&sid=221320&channel=0&pt=213.4&from=mainsite&r=a2d009faac
     url = 'http://douban.fm/j/mine/playlist'
 
-    def __init__(self, config):
-        self.cookiejar = config.getCookiejar()
+    def __init__(self, conf):
+        self.cookiejar = conf.getCookiejar()
         cookieHandler = urllib2.HTTPCookieProcessor(self.cookiejar)
         self.opener = urllib2.build_opener(cookieHandler)
         self.song = None

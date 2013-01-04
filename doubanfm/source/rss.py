@@ -22,12 +22,8 @@ class RSS(api.Source):
     '''
 
     def __init__(self, conf):
-        self.config = conf
-        name = self.config.get('name')
-        if name:
-            self.name = util.decode(name)
-        else:
-            self.name = self.config.name
+        self.conf = conf
+        name = self.conf.getName()
 
         self.last_id = None
         self.cur_id = None
