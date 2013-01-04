@@ -178,6 +178,8 @@ class UpdateSongs(object):
 
     def __init__(self, source):
         self.source = source
+        self.last_id = self.source.last_id or self.source.cur_id
+        self.init_count = self.source.init_count
         self.opener = urllib2.build_opener()
         if source.proxy_enable and source.proxy:
             logger.debug(u'使用代理 %s' % source.proxy)
@@ -228,8 +230,6 @@ class UpdateSongs(object):
         logger.info(u'解析 rss %s', rss)
         response = self.opener.open(rss, timeout=config.TIMEOUT)
         tree = etree.parse(response)
-        last_id = self.source.last_id or self.source.cur_id
-        init_count = self.source.init_count
         songs = []
         for item in tree.findall('channel/item'):
             song = Song()
@@ -243,10 +243,10 @@ class UpdateSongs(object):
             song.title = item.find('title').text
             song.id = item.find('guid').text.strip()
             song.pubDate = item.find('pubDate').text
-            if last_id and song.id == last_id:
+            if self.last_id and song.id == self.last_id:
                 break
             songs.append(song)
-            if not last_id and len(songs) >= init_count:
+            if not self.last_id and len(songs) >= self.init_count:
                 break
         songs.reverse()
         return songs
