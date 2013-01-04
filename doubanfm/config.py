@@ -75,7 +75,7 @@ def buildSources(cp):
 
 class Config(object):
 
-    def __init__(self, name, cp=None):
+    def __init__(self, name='tmp', cp=None):
         self.name = name
         if cp is None:
             cp = ConfigParser.ConfigParser()

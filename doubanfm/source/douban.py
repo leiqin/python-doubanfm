@@ -13,14 +13,22 @@ import api
 logger = logging.getLogger(__name__)
 
 class Douban(api.Source):
+    '''
+    配置参数：
+        cookiefile (可选) <string> cookie 文件路径，格式为 FireCookie(Firefox 插件) 导出格式
+    '''
 
     # http://douban.fm/j/mine/playlist?type=e&sid=221320&channel=0&pt=213.4&from=mainsite&r=a2d009faac
     url = 'http://douban.fm/j/mine/playlist'
 
-    def __init__(self, conf):
-        self.cookiejar = conf.getCookiejar()
-        cookieHandler = urllib2.HTTPCookieProcessor(self.cookiejar)
-        self.opener = urllib2.build_opener(cookieHandler)
+    def __init__(self, conf=None):
+        self.conf = conf
+        self.opener = urllib2.build_opener()
+
+        if conf and 'cookiefile' in self.conf:
+            self.cookiejar = self.conf.getCookiejar()
+            cookieHandler = urllib2.HTTPCookieProcessor(self.cookiejar)
+            self.opener.add_handler(cookieHandler)
         self.song = None
         self.songs = []
 
@@ -201,13 +209,15 @@ class Song(api.Song):
         return ''.join([self.title, ' <', self.artist, '>'])
 
 if __name__ == '__main__':
-    douban = Douban()
-#    res = douban._open(type='r', sid='35875', pt = 20.0)
-#    res.close()
-    req = urllib2.Request('http://douban.fm/mine?typed=player')
-    f = douban.opener.open(req)
-    print req.headers
-    print req.unredirected_hdrs
-    r = f.read()
-    print r
+    conf = config.Config()
+#    conf['cookiefile'] = '/home/leiqin/.cache/python-doubanfm/cookies.txt'
+    douban = Douban(conf)
+    song = douban.next()
+    print song.info()
+#    req = urllib2.Request('http://douban.fm/mine?typed=liked')
+#    f = douban.opener.open(req)
+#    print req.headers
+#    print req.unredirected_hdrs
+#    r = f.read()
+#    print r
     douban.close()
