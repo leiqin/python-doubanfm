@@ -29,7 +29,7 @@ class RSS(api.Source):
         self.cur_id = None
         self.song = None
         self.songs = OrderedDict()
-        self.cachedir = os.path.join(config.cachedir, self.config.name)
+        self.cachedir = os.path.join(config.cachedir, self.conf.name)
         util.initDir(self.cachedir)
         self.cur_file = os.path.join(self.cachedir, 'cur')
         if os.path.exists(self.cur_file):
@@ -37,23 +37,23 @@ class RSS(api.Source):
                 self.cur_id = util.decode(f.read()).strip()
 
         self.pre_download = False
-        if 'pre_download' in self.config:
-            self.pre_download = self.config.getboolean('pre_download')
+        if 'pre_download' in self.conf:
+            self.pre_download = self.conf.getboolean('pre_download')
         self.loadCache()
         self.clearCache()
         self.saveCache()
 
         self.proxy_enable = False
         self.proxy = None
-        if 'proxy_enable' in self.config:
-            self.proxy_enable = self.config.getboolean('proxy_enable')
-        if 'proxy' in self.config:
-            self.proxy = self.config.get('proxy')
+        if 'proxy_enable' in self.conf:
+            self.proxy_enable = self.conf.getboolean('proxy_enable')
+        if 'proxy' in self.conf:
+            self.proxy = self.conf.get('proxy')
 
         self.updating = False
         update_on_startup = False
-        if 'update_on_startup' in self.config:
-            update_on_startup = self.config.getboolean('update_on_startup')
+        if 'update_on_startup' in self.conf:
+            update_on_startup = self.conf.getboolean('update_on_startup')
         if update_on_startup:
             self.update()
 
@@ -177,7 +177,7 @@ class UpdateSongs(threading.Thread):
 
     def run(self):
         try:
-            rss = self.source.config.get('rss')
+            rss = self.source.conf.get('rss')
             logger.info(u'更新 rss %s', rss)
             response = self.opener.open(rss, timeout=config.TIMEOUT)
             tree = etree.parse(response)
