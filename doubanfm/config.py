@@ -136,6 +136,12 @@ class Config(object):
         else:
             return self.name
 
+    def getCacheDir(self):
+        cachedir = '/tmp'
+        if 'cachedir' in self:
+            cachedir = self.get('cachedir')
+        return os.path.join(cachedir, self.name)
+
     def getCookiejar(self):
         cookiefile = self.get('cookiefile')
         if cookiefile in cookiejars:

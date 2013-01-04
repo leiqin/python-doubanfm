@@ -16,6 +16,7 @@ class RSS(api.Source):
         rss (必须) <string> RSS 源的网址
         name (可选) <string> 名称
         update_on_startup (可选) <boolean> 服务启动时更新
+        init_count (可选) <int> 第一次更新时保留多少条目
         pre_download (可选) <boolean> 预下载，先下载，后播放
         proxy_enable (可选) <boolean> 是否使用代理
         proxy (可选) <string> 代理，如：http://localhost:8118
@@ -23,13 +24,13 @@ class RSS(api.Source):
 
     def __init__(self, conf):
         self.conf = conf
-        name = self.conf.getName()
+        self.name = self.conf.getName()
 
         self.last_id = None
         self.cur_id = None
         self.song = None
         self.songs = OrderedDict()
-        self.cachedir = os.path.join(config.cachedir, self.conf.name)
+        self.cachedir = self.conf.getCacheDir()
         util.initDir(self.cachedir)
         self.cur_file = os.path.join(self.cachedir, 'cur')
         if os.path.exists(self.cur_file):
@@ -39,9 +40,13 @@ class RSS(api.Source):
         self.pre_download = False
         if 'pre_download' in self.conf:
             self.pre_download = self.conf.getboolean('pre_download')
-        self.loadCache()
-        self.clearCache()
-        self.saveCache()
+            self.loadCache()
+            self.clearCache()
+            self.saveCache()
+
+        self.init_count = 1
+        if 'init_count' in self.conf:
+            self.init_count = self.conf.getint('init_count')
 
         self.proxy_enable = False
         self.proxy = None
@@ -61,8 +66,13 @@ class RSS(api.Source):
         if self.updating:
             return
         self.updating = True
-        th = UpdateSongs(self)
+        call = self.updateCallable()
+        th = threading.Thread(target=call)
+        th.daemon = True
         th.start()
+
+    def updateCallable(self):
+        return UpdateSongs(self)
 
     def next(self):
         if not self.songs:
@@ -164,30 +174,23 @@ class RSS(api.Source):
             with open(self.cur_file, 'w') as f:
                 f.write(util.encode(self.cur_id))
 
-class UpdateSongs(threading.Thread):
+class UpdateSongs(object):
 
     def __init__(self, source):
-        threading.Thread.__init__(self)
-        self.daemon = True
         self.source = source
         self.opener = urllib2.build_opener()
         if source.proxy_enable and source.proxy:
             logger.debug(u'使用代理 %s' % source.proxy)
             self.opener.add_handler(urllib2.ProxyHandler({'http':source.proxy}))
 
-    def run(self):
+    def __call__(self):
         try:
-            rss = self.source.conf.get('rss')
-            logger.info(u'更新 rss %s', rss)
-            response = self.opener.open(rss, timeout=config.TIMEOUT)
-            tree = etree.parse(response)
-            songs = UpdateSongs.parse(tree, self.source.last_id or self.source.cur_id)
+            logger.info(u'更新源 %s', self.source.name)
+            songs = self.update()
             if not songs:
-                logger.debug(u'rss 中没有需要更新的内容 %s', rss)
+                logger.debug(u'%s 中没有需要更新的内容', self.source.name)
                 self.source.clearCache()
                 return
-            if not self.source.last_id and not self.source.cur_id:
-                songs = songs[-1:]
             for song in songs:
                 song.source = self.source
                 if self.source.pre_download:
@@ -195,10 +198,10 @@ class UpdateSongs(threading.Thread):
                 self.source.songs[song.id] = song
                 self.source.saveCache()
             self.source.last_id = song.id
-            logger.debug(u'更新完成 rss %s', rss)
+            logger.debug(u'更新完成 %s', self.source.name)
             self.source.clearCache()
         except:
-            logger.exception(u'更新出错 rss %s', rss)
+            logger.exception(u'更新出错 %s', self.source.name)
         finally:
             self.source.updating = False
             self.opener.close()
@@ -220,8 +223,13 @@ class UpdateSongs(threading.Thread):
         song.file = path
         logger.debug(u'下载完成 <%s> %s', path, song.url)
 
-    @staticmethod
-    def parse(tree, last_id=None):
+    def update(self):
+        rss = self.source.conf.get('rss')
+        logger.info(u'解析 rss %s', rss)
+        response = self.opener.open(rss, timeout=config.TIMEOUT)
+        tree = etree.parse(response)
+        last_id = self.source.last_id or self.source.cur_id
+        init_count = self.source.init_count
         songs = []
         for item in tree.findall('channel/item'):
             song = Song()
@@ -238,6 +246,8 @@ class UpdateSongs(threading.Thread):
             if last_id and song.id == last_id:
                 break
             songs.append(song)
+            if not last_id and len(songs) >= init_count:
+                break
         songs.reverse()
         return songs
 
@@ -262,10 +272,15 @@ class Song(api.Song):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     import sys
-    f = urllib2.urlopen(sys.argv[1])
-    tree = etree.parse(f)
-    songs = UpdateSongs.parse(tree)
-    for song in songs:
+    rss = sys.argv[1]
+    conf = config.Config()
+    conf['rss'] = rss
+    conf['init_count'] = 5
+    source = RSS(conf)
+    call = source.updateCallable()
+    call()
+    for song in source.songs.values():
         print song.info()
         print ''

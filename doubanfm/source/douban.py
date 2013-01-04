@@ -209,6 +209,7 @@ class Song(api.Song):
         return ''.join([self.title, ' <', self.artist, '>'])
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     conf = config.Config()
 #    conf['cookiefile'] = '/home/leiqin/.cache/python-doubanfm/cookies.txt'
     douban = Douban(conf)
