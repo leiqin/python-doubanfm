@@ -126,7 +126,7 @@ class Config(object):
         return None
 
     def set(self, key, value):
-        if value is not None or type(value) != str or type(value) != unicode:
+        if value is not None and type(value) != str and type(value) != unicode:
             value = str(value)
         self.cp.set(self.name, key, value)
 
