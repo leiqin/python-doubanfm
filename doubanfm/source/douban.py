@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 class Douban(api.Source):
     '''
+    豆瓣FM
+
     配置参数：
         cookiefile (可选) <string> cookie 文件路径，格式为 FireCookie(Firefox 插件) 导出格式
     '''
