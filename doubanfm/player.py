@@ -24,7 +24,7 @@ class Player(threading.Thread):
 
     song = None
 
-    def __init__(self, source):
+    def __init__(self, source=None):
         pass
         # 由于 pyglet.media 在导入后即便什么也没做
         # 也会在退出时出现警告：
@@ -53,6 +53,11 @@ class Player(threading.Thread):
                 # 有时文件头指定的 duration 和歌曲的实际长度并不一致
                 # 以实际长度为准
                 song.duration = song.time
+
+                if not self.source:
+                    self.pause()
+                    return
+
                 waitTime = MIN_WAIT_TIME
                 while song == self.song and song.duration == song.time:
                     # 如果是网络故障，当前歌曲没有变
@@ -176,11 +181,15 @@ class Player(threading.Thread):
                 return
             self.player.pause()
             song = self.song
-            if not song.file and not song.tmpfile:
+            if song.time < song.duration and not song.file and not song.tmpfile:
                 self._download(song)
 
-    def play(self):
+    def play(self, song=None, seek=None):
         with self.condition:
+            if song:
+                self._playnext(song, seek)
+                return
+
             if self.player.playing:
                 return
             song = self.song
@@ -329,10 +338,10 @@ if __name__ == "__main__":
 
         def oneline(self):
             return self.file
-    p = Player(None)
+    p = Player()
     f = sys.argv[1]
-    seek = 0
+    seek = None
     if len(sys.argv) >= 3:
         seek = int(sys.argv[2])
-    p._playnext(Song(sys.argv[1]), seek)
+    p.play(Song(f), seek)
     p.run()
