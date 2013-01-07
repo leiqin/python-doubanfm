@@ -113,12 +113,12 @@ class RSS(api.Source):
             logger.debug(u'歌曲源 <%s> 加载缓存', self.name)
             with open(cachefile, 'rb') as f:
                 songs = pickle.load(f)
+            old = True
             for song in songs:
                 song.source = self
                 if not self.cur_id:
                     self.songs[song.id] = song
                 else:
-                    old = True
                     if song.id == self.cur_id:
                         self.song = song
                         old = False
