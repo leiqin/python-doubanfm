@@ -227,7 +227,7 @@ class UpdateSongs(object):
 
     def update(self):
         rss = self.source.conf.get('rss')
-        logger.info(u'解析 rss %s', rss)
+        logger.debug(u'解析 rss %s', rss)
         response = self.opener.open(rss, timeout=config.TIMEOUT)
         tree = etree.parse(response)
         songs = []
