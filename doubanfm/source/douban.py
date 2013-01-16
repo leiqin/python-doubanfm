@@ -1,10 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import urllib
-import urllib2
-import json
-import StringIO
+import urllib, urllib2, json, StringIO, random, string
 import logging
 
 from doubanfm import util, config
@@ -78,12 +75,22 @@ class Douban(api.Source):
         if pt != None:
             params['pt'] = '%.1f' % pt
         params['from'] = 'mainsite'
+        params['r'] = self.random()
         url = self.url
         if params:
             url = ''.join([url, '?', urllib.urlencode(params)])
         logger.info(u'请求URL %s', util.decode(url))
         response = self.opener.open(url, timeout=config.TIMEOUT)
         return response
+
+    randomString = '0123456789' + string.ascii_lowercase
+
+    def random(self):
+        result = []
+        b = len(self.randomString) - 1
+        for i in range(10):
+            result.append(self.randomString[random.randint(0, b)])
+        return ''.join(result)
 
     def _buildSong(self, data):
         song = Song(data)

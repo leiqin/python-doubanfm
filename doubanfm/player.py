@@ -326,7 +326,6 @@ pyglet.clock.schedule_interval_soft(lambda dt:None, 0.09)
 
 
 if __name__ == "__main__":
-    import sys
     import source.api
     class Song(source.api.Song):
 
