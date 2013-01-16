@@ -77,6 +77,7 @@ class Douban(api.Source):
             params['channel'] = channel
         if pt != None:
             params['pt'] = '%.1f' % pt
+        params['from'] = 'mainsite'
         url = self.url
         if params:
             url = ''.join([url, '?', urllib.urlencode(params)])
