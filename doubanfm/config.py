@@ -11,8 +11,6 @@ import util, cookie
 
 logger = logging.getLogger(__name__)
 
-TIMEOUT = 30
-
 configdir = os.path.expanduser(util.configdir)
 cachedir = os.path.expanduser(util.cachedir)
 logconf = os.path.join(configdir, 'logging.conf')
@@ -48,8 +46,11 @@ def load():
 
     cp = ConfigParser.ConfigParser(default)
     cp.read(conf)
+    global glob
+    glob = Config('global', cp)
     return cp
 
+glob = None
 cookiejars = {}
 
 def saveCookie():
@@ -84,7 +85,10 @@ class Config(object):
         self.cp = cp
 
     def __contains__(self, key):
-        return self.cp.has_option(self.name, key) or \
+        if 'global' == self.name:
+            return self.cp.has_option(self.name, key)
+        else:
+            return self.cp.has_option(self.name, key) or \
                 self.cp.has_option('common', key)
 
     def __getitem__(self, key):
@@ -97,33 +101,41 @@ class Config(object):
     def __setitem__(self, key, value):
         self.set(key, value)
 
-    def getint(self, key):
+    def getint(self, key, default=None):
         if self.cp.has_option(self.name, key):
             return self.cp.getint(self.name, key)
+        if 'global' == self.name:
+            return default
         if self.cp.has_option('common', key):
             return self.cp.getint('common', key)
-        return None
+        return default
 
-    def getfloat(self, key):
+    def getfloat(self, key, default=None):
         if self.cp.has_option(self.name, key):
             return self.cp.getfloat(self.name, key)
+        if 'global' == self.name:
+            return default
         if self.cp.has_option('common', key):
             return self.cp.getfloat('common', key)
-        return None
+        return default
 
-    def getboolean(self, key):
+    def getboolean(self, key, default=None):
         if self.cp.has_option(self.name, key):
             return self.cp.getboolean(self.name, key)
+        if 'global' == self.name:
+            return default
         if self.cp.has_option('common', key):
             return self.cp.getboolean('common', key)
-        return None
+        return default
 
-    def get(self, key):
+    def get(self, key, default=None):
         if self.cp.has_option(self.name, key):
             return self.cp.get(self.name, key)
+        if 'global' == self.name:
+            return default
         if self.cp.has_option('common', key):
             return self.cp.get('common', key)
-        return None
+        return default
 
     def set(self, key, value):
         if value is not None and type(value) != str and type(value) != unicode:

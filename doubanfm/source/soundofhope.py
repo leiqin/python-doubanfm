@@ -34,7 +34,7 @@ class UpdateSongs(rss.UpdateSongs):
         home = 'http://soundofhope.org'
         label_l1 = util.decode(self.source.conf.get('label_l1'))
         label_l2 = util.decode(self.source.conf.get('label_l2'))
-        response = self.opener.open(home, timeout=config.TIMEOUT)
+        response = self.opener.open(home, timeout=config.glob.getint('timeout', 30))
         html = etree.parse(response, etree.HTMLParser())
         for l1 in html.findall('//div[@id="nav-site"]/ul/li[a]'):
             a = l1.find('a')
@@ -53,7 +53,7 @@ class UpdateSongs(rss.UpdateSongs):
 
         items = urlparse.urljoin(home, l2.get('href'))
 
-        response = self.opener.open(items, timeout=config.TIMEOUT)
+        response = self.opener.open(items, timeout=config.glob.getint('timeout', 30))
         html = etree.parse(response, etree.HTMLParser())
         for item in html.findall('//div[@id="CategoryCol_mid"]/div/ul/li/a'):
             url = urlparse.urljoin(items, item.get('href')).strip()
@@ -62,7 +62,7 @@ class UpdateSongs(rss.UpdateSongs):
             song = rss.Song()
             song.id = url
             song.title = item.text.strip()
-            response = self.opener.open(url, timeout=config.TIMEOUT)
+            response = self.opener.open(url, timeout=config.glob.getint('timeout', 30))
             html = etree.parse(response, etree.HTMLParser())
             div = html.find('//div[@id="columnfirstnei2"]')
             pubDate = div.find('div[@class="subtitle"]/span[@class="date"]')
