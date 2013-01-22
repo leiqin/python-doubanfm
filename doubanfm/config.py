@@ -36,6 +36,8 @@ def copyfile(src, dest):
             data = s.read()
             d.write(data)
 
+_global = None
+
 def load():
     default = {
             'home' : os.path.expanduser('~'),
@@ -46,11 +48,30 @@ def load():
 
     cp = ConfigParser.ConfigParser(default)
     cp.read(conf)
-    global glob
-    glob = Config('global', cp)
+    global _global
+    _global = Config('global', cp)
     return cp
 
-glob = None
+def getint(key, default=None):
+    if _global:
+        return _global.getint(key, default)
+    return default
+
+def getfloat(key, default=None):
+    if _global:
+        return _global.getfloat(key, default)
+    return default
+
+def getboolean(key, default=None):
+    if _global:
+        return _global.getboolean(key, default)
+    return default
+
+def get(key, default=None):
+    if _global:
+        return _global.get(key, default)
+    return default
+
 cookiejars = {}
 
 def saveCookie():

@@ -214,7 +214,7 @@ class UpdateSongs(object):
         if not suffix:
             suffix = '.mp3'
         fd, path = tempfile.mkstemp(suffix, '', self.source.cachedir)
-        response = self.opener.open(song.url, timeout=config.glob.getint('timeout', 30))
+        response = self.opener.open(song.url, timeout=config.getint('timeout', 30))
         while True:
             data = response.read(4096)
             if not data:
@@ -228,7 +228,7 @@ class UpdateSongs(object):
     def update(self):
         rss = self.source.conf.get('rss')
         logger.debug(u'解析 rss %s', rss)
-        response = self.opener.open(rss, timeout=config.glob.getint('timeout', 30))
+        response = self.opener.open(rss, timeout=config.getint('timeout', 30))
         tree = etree.parse(response)
         songs = []
         for item in tree.findall('channel/item'):

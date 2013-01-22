@@ -80,7 +80,7 @@ class Douban(api.Source):
         if params:
             url = ''.join([url, '?', urllib.urlencode(params)])
         logger.info(u'请求URL %s', util.decode(url))
-        response = self.opener.open(url, timeout=config.glob.getint('timeout', 30))
+        response = self.opener.open(url, timeout=config.getint('timeout', 30))
         return response
 
     randomString = '0123456789' + string.ascii_lowercase
