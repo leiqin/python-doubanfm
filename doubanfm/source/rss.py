@@ -63,9 +63,6 @@ class RSS(api.Source):
             self.update()
 
     def update(self):
-        if self.updating:
-            return
-        self.updating = True
         call = self.updateCallable()
         th = threading.Thread(target=call)
         th.daemon = True
@@ -186,6 +183,9 @@ class UpdateSongs(object):
             self.opener.add_handler(urllib2.ProxyHandler({'http':source.proxy}))
 
     def __call__(self):
+        if self.source.updating:
+            return
+        self.source.updating = True
         try:
             logger.info(u'更新源 %s', self.source.name)
             songs = self.update()
