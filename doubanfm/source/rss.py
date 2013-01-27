@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import xml.etree.ElementTree as etree
-import threading, os, os.path, urllib2, copy, pickle
+import os, os.path, urllib2, copy, pickle
 import logging, tempfile
 from collections import OrderedDict
 
 import api
-from doubanfm import util, config
+from doubanfm import util, config, threadpool
 
 logger = logging.getLogger(__name__)
 
@@ -64,9 +64,7 @@ class RSS(api.Source):
 
     def update(self):
         call = self.updateCallable()
-        th = threading.Thread(target=call)
-        th.daemon = True
-        th.start()
+        threadpool.submit(call)
 
     def updateCallable(self):
         return UpdateSongs(self)
@@ -179,7 +177,7 @@ class UpdateSongs(object):
         self.init_count = self.source.init_count
         self.opener = urllib2.build_opener()
         if source.proxy_enable and source.proxy:
-            logger.debug(u'使用代理 %s' % source.proxy)
+            logger.debug(u'使用代理 %s %s' % (source.name, source.proxy))
             self.opener.add_handler(urllib2.ProxyHandler({'http':source.proxy}))
 
     def __call__(self):
