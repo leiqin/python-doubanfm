@@ -101,7 +101,7 @@ class Player(threading.Thread):
     def run(self):
         try:
             pyglet.app.run()
-        except:
+        except Exception:
             logger.exception('pyglet.app.run() 发生异常')
             raise
 
@@ -290,7 +290,7 @@ class DownloadFile(threading.Thread):
             os.close(fd)
             self.song.file = tmpfile
             logger.debug(u'下载完成 <%s> %s', tmpfile, url)
-        except:
+        except Exception:
             logger.exception(u'下载文件出错 %s', url)
 
 # 这一行代码是必需的

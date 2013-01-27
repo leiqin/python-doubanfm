@@ -41,7 +41,7 @@ class FirecookieCookieJar(FileCookieJar):
                 try:
                     t = time.strptime(expires, self.timeformat)
                     expires = time.mktime(t)
-                except:
+                except Exception:
                     arr.insert(0, expires)
                     expires = None
 

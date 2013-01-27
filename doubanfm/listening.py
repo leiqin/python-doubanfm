@@ -37,7 +37,7 @@ def init():
 def start():
     try:
         init()
-    except:
+    except Exception:
         logger.exception(u'初始化时发生异常')
         raise
 
@@ -51,7 +51,7 @@ def start():
         while not closed:
             con, add = s.accept()
             handler(con)
-    except:
+    except Exception:
         logger.exception(u'处理命令时发生异常')
         raise
     finally:

@@ -54,7 +54,7 @@ class Douban(api.Source):
                 logger.debug(response.headers)
                 logger.debug(data)
                 continue
-            except:
+            except Exception:
                 logger.exception(u'解析歌曲列表异常 url = %s', util.decode(response.geturl()))
                 logger.error(response.headers)
                 logger.error(data)

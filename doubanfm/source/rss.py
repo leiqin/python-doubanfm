@@ -124,7 +124,7 @@ class RSS(api.Source):
                         self.songs[song.id] = song
             if song:
                 self.last_id = song.id
-        except:
+        except Exception:
             logger.exception(u'加载缓存出错 %s', cachefile)
 
     def saveCache(self):
@@ -202,7 +202,7 @@ class UpdateSongs(object):
             self.source.last_id = song.id
             logger.debug(u'更新完成 %s', self.source.name)
             self.source.clearCache()
-        except:
+        except Exception:
             logger.exception(u'更新出错 %s', self.source.name)
         finally:
             self.source.updating = False
