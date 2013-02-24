@@ -138,6 +138,8 @@ class Player(threading.Thread):
 
         while True:
             song = self.source.next()
+            if not song:
+                return None
             try:
                 return self._load(song)
             except AVbinException:
@@ -168,7 +170,10 @@ class Player(threading.Thread):
     def _playnext(self, song=None, seek=None):
         with self.condition:
             song = self._next(song)
-            self._play(song, seek)
+            if song:
+                self._play(song, seek)
+            else:
+                self.pause()
 
     def _download(self, song):
         song.tmpfile = True
