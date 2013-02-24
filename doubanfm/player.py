@@ -253,7 +253,8 @@ class Player(threading.Thread):
                 m = getattr(self.source, 'channel')
                 m(name)
                 self.songs = []
-                self._playnext()
+                if self.playing:
+                    self._playnext()
 
     def listChannel(self):
         with self.condition:
