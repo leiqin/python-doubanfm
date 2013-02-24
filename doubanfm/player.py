@@ -174,6 +174,8 @@ class Player(threading.Thread):
                 self._play(song, seek)
             else:
                 self.pause()
+                self.player.next()
+                self.song = None
 
     def _download(self, song):
         song.tmpfile = True
@@ -244,6 +246,20 @@ class Player(threading.Thread):
     def update(self):
         if hasattr(self.source, 'update'):
             self.source.update()
+
+    def channel(self, name):
+        with self.condition:
+            if hasattr(self.source, 'channel'):
+                m = getattr(self.source, 'channel')
+                m(name)
+                self.songs = []
+                self._playnext()
+
+    def listChannel(self):
+        with self.condition:
+            if hasattr(self.source, 'listChannel'):
+                m = getattr(self.source, 'listChannel')
+                return m()
 
     def _clearTmpfile(self):
         song = self.song

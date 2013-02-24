@@ -47,6 +47,11 @@ parser.add_argument('-x', '--exit', action='store_const',
 parser.add_argument('-U', '--update', action='store_const',
         const='update', dest='cmd', help='更新 RSS')
 
+LIST_CHANNEL = 'listChannel'
+parser.add_argument('-c', '--channel', nargs='?', action='store',
+        const=LIST_CHANNEL, dest='channel', 
+        help='选择某个频道，如果没有指定频道，则会列出所有可选的频道')
+
 parser.add_argument('-r', '--reply', action='store_true',
         help='等待应答信息，-i -l 本来就会等待应答')
 
@@ -118,6 +123,11 @@ elif args.cmd:
             sendcmd(args.cmd, args.reply)
     else:
         print >>sys.stderr, '服务尚未启动'
+elif args.channel:
+    if serverHasStart():
+        if args.channel == LIST_CHANNEL:
+            sendcmd('channel', True)
+        else:
+            sendcmd('channel', args.reply, args.channel)
 else:
     parser.print_help()
-

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import logging, itertools
+import logging, itertools, collections
 
 import api
 from doubanfm import config
@@ -17,6 +17,9 @@ class SimpleSourceManager(api.Source):
             sources = []
         self.rawSources = sources
         self.sources = itertools.cycle(self.rawSources)
+        self.source = None
+        self.count = 0
+        self.threshold = 0
 
     def addSource(self, source):
         self.rawSources.append(source)
@@ -54,6 +57,8 @@ class SimpleSourceManager(api.Source):
 
     def list(self, size=None):
         result = []
+        if not self.source:
+            self._nextSource()
         source = self.source
         while True:
             temp = source.list(size)
@@ -75,7 +80,7 @@ class SimpleSourceManager(api.Source):
         song.source.select(song)
 
     def update(self):
-        for source in self.sources:
+        for source in self.rawSources:
             if hasattr(source, 'update'):
                 source.update()
 
@@ -83,3 +88,53 @@ class SimpleSourceManager(api.Source):
         config.saveCookie()
         for source in self.rawSources:
             source.close()
+
+class SimpleChannelSourceManager(api.Source):
+
+    def __init__(self, sources):
+        self.rawSources = sources
+        self.channels = collections.defaultdict(SimpleSourceManager)
+        self.current = self.channels[config.get('default_channel', 'all')]
+        for source in self.rawSources:
+            self.channels['all'].addSource(source)
+            for c in source.conf.get('channel', '').split(','):
+                if not c or c == 'all':
+                    continue
+                self.channels[c].addSource(source)
+
+    def listChannel(self):
+        result = []
+        for name, channel in self.channels.items():
+            if channel is self.current:
+                result.append('* %s' % name)
+            else:
+                result.append('  %s' % name)
+        return '\n'.join(result)
+
+    def channel(self, name):
+        if name in self.channels:
+            self.current = self.channels[name]
+        else:
+            raise Exception, 'no channel %s' % name
+
+    def update(self):
+        for source in self.rawSources:
+            if hasattr(source, 'update'):
+                source.update()
+
+    def close(self):
+        config.saveCookie()
+        for source in self.rawSources:
+            source.close()
+
+    def next(self):
+        return self.current.next()
+
+    def list(self, size=None):
+        return self.current.list(size)
+
+    def skip(self, song):
+        return self.current.skip(song)
+
+    def select(self, song):
+        return self.current.select(song)

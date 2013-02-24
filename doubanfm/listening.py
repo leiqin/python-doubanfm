@@ -25,10 +25,8 @@ def init():
         logger.debug(cla)
         cla = resolve(cla)
     else:
-        cla = source.SimpleSourceManager
+        cla = source.SimpleChannelSourceManager
     sources = config.buildSources(cp)
-    if not sources:
-        raise Exception, u'没有配置有效的歌曲源'
     sm = cla(sources) 
     global player
     player = Player(sm)
@@ -153,6 +151,12 @@ class CmdHander(object):
 
     def update(self, *args):
         player.update()
+
+    def channel(self, *args):
+        if args:
+            player.channel(args[0])
+        else:
+            return player.listChannel()
 
     def exit(self, *args):
         global closed
