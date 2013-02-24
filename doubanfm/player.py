@@ -251,10 +251,10 @@ class Player(threading.Thread):
         with self.condition:
             if hasattr(self.source, 'channel'):
                 m = getattr(self.source, 'channel')
-                m(name)
-                self.songs = []
-                if self.playing:
-                    self._playnext()
+                if m(name):
+                    self.songs = []
+                    if self.playing:
+                        self._playnext()
 
     def listChannel(self):
         with self.condition:

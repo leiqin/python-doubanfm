@@ -113,7 +113,11 @@ class SimpleChannelSourceManager(api.Source):
 
     def channel(self, name):
         if name in self.channels:
-            self.current = self.channels[name]
+            if self.current is self.channels[name]:
+                return False
+            else:
+                self.current = self.channels[name]
+                return True
         else:
             raise Exception, 'no channel %s' % name
 
