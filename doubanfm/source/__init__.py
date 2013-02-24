@@ -30,20 +30,23 @@ class SimpleSourceManager(api.Source):
                 return song
             self._nextSource()
             if source is self.source:
-                return None
+                return self._nextSong()
 
     def _nextSong(self):
+        if self.threshold > 0 and self.count >= self.threshold:
+            return None
         song = self.source.next()
         if song:
             self.count += 1
-        if self.threshold >= 0 and self.count >= self.threshold:
-            self._nextSource()
+            logger.debug(song.oneline())
+        logger.debug(song)
         return song
 
     def _nextSource(self):
         self.source = self.sources.next()
         self.count = 0
         self.threshold = self.source.conf.getint('threshold', 1)
+        logger.debug(u'选择源 %s' % self.source.name)
 
     def list(self, size=None):
         result = []
@@ -74,5 +77,8 @@ class SimpleSourceManager(api.Source):
 
     def close(self):
         config.saveCookie()
+        s = self.sources.next()
         for source in self.sources:
             source.close()
+            if source is s:
+                break

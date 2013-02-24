@@ -24,6 +24,7 @@ class Douban(api.Source):
     def __init__(self, conf=None):
         self.conf = conf
         self.opener = urllib2.build_opener()
+        self.name = u'豆瓣FM'
 
         if conf and 'cookiefile' in self.conf:
             self.cookiejar = self.conf.getCookiejar()
@@ -208,7 +209,7 @@ class Song(api.Song):
         if self.publicTime:
             output.write('Public    : %s\n' % self.publicTime)
         if self.source:
-            output.write(u'Source    : %s\n' % u'豆瓣FM')
+            output.write(u'Source    : %s\n' % self.source.name)
         if self.time and self.duration:
             output.write('Time      : %s\n' % util.showtime(self.time))
             output.write('Duration  : %s\n' % util.showtime(self.duration))
