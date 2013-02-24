@@ -225,6 +225,7 @@ if __name__ == '__main__':
     douban = Douban(conf)
     song = douban.next()
     print song.info()
+    print song.url
 #    req = urllib2.Request('http://douban.fm/mine?typed=liked')
 #    f = douban.opener.open(req)
 #    print req.headers
