@@ -15,6 +15,7 @@ class Douban(api.Source):
 
     配置参数：
         cookiefile (可选) <string> cookie 文件路径，格式为 FireCookie(Firefox 插件) 导出格式
+        threshold (可选) <int> 当有多个源时，每次该源播放的歌曲数，0 表示放完为止，默认为 1
     '''
 
     # http://douban.fm/j/mine/playlist?type=e&sid=221320&channel=0&pt=213.4&from=mainsite&r=a2d009faac

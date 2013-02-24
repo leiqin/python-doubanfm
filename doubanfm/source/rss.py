@@ -15,11 +15,12 @@ class RSS(api.Source):
     配置选项：
         rss (必须) <string> RSS 源的网址
         name (可选) <string> 名称
-        update_on_startup (可选) <boolean> 服务启动时更新
-        init_count (可选) <int> 第一次更新时保留多少条目
-        pre_download (可选) <boolean> 预下载，先下载，后播放
-        proxy_enable (可选) <boolean> 是否使用代理
+        update_on_startup (可选) <boolean> 服务启动时更新，默认为 False
+        init_count (可选) <int> 第一次更新时保留多少条目，默认为 1
+        pre_download (可选) <boolean> 预下载，先下载，后播放，默认为 False
+        proxy_enable (可选) <boolean> 是否使用代理，默认为 False
         proxy (可选) <string> 代理，如：http://localhost:8118
+        threshold (可选) <int> 当有多个源时，每次该源播放的歌曲数，0 表示放完为止，默认为 1
     '''
 
     def __init__(self, conf):
