@@ -12,17 +12,21 @@ class SimpleSourceManager(api.Source):
     注意： 该类是线程不安全的
     '''
 
-    def __init__(self, cp):
-        self.cp = cp
-        sources = config.buildSources(cp)
+    def __init__(self, sources=None):
         if not sources:
-            raise Exception, u'没有配置有效的歌曲源'
-        self.sources = itertools.cycle(sources)
-        self.source = self.sources.next()
-        self.count = 0
-        self.threshold = self.source.conf.getint('threshold', 1)
+            sources = []
+        self.rawSources = sources
+        self.sources = itertools.cycle(self.rawSources)
+
+    def addSource(self, source):
+        self.rawSources.append(source)
+        self.sources = itertools.cycle(self.rawSources)
 
     def next(self):
+        if not self.rawSources:
+            return None
+        if not self.source:
+            self._nextSource()
         source = self.source
         while True:
             song = self._nextSong()
@@ -45,7 +49,7 @@ class SimpleSourceManager(api.Source):
     def _nextSource(self):
         self.source = self.sources.next()
         self.count = 0
-        self.threshold = self.source.conf.getint('threshold', 1)
+        self.threshold = self.source.conf.getint('threshold', 0)
         logger.debug(u'选择源 %s' % self.source.name)
 
     def list(self, size=None):
@@ -77,8 +81,5 @@ class SimpleSourceManager(api.Source):
 
     def close(self):
         config.saveCookie()
-        s = self.sources.next()
-        for source in self.sources:
+        for source in self.rawSources:
             source.close()
-            if source is s:
-                break

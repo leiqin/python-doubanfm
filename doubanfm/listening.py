@@ -26,7 +26,10 @@ def init():
         cla = resolve(cla)
     else:
         cla = source.SimpleSourceManager
-    sm = cla(cp) 
+    sources = config.buildSources(cp)
+    if not sources:
+        raise Exception, u'没有配置有效的歌曲源'
+    sm = cla(sources) 
     global player
     player = Player(sm)
     player.start()
