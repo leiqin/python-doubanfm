@@ -3,12 +3,6 @@ python-doubanfm
 
 python 豆瓣FM 命令行客户端
 
-需要安装 pyglet 和 AVbin
-在 debian 里可以使用如下命令：
-
-    sudo apt-get install python-pyglet
-    sudo apt-get install libavbin0
-
 启动服务：
 
     fm -s 2>/dev/null

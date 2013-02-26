@@ -18,5 +18,5 @@ setup(name='python-doubanfm',
       package_data={'doubanfm': ['*.conf']},
       scripts=['fm'],
       license='GPL-3+',
-      requires=['pyglet','lxml'],
+      requires=['gst','lxml'],
       )
