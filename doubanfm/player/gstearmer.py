@@ -59,7 +59,7 @@ class GstPlayer(api.Player):
         if not seek:
             return True
         # 转换成纳秒
-        seek = seek * 1000*1000*1000
+        seek = int(seek * 1000*1000*1000)
         event = gst.event_new_seek(1.0, gst.FORMAT_TIME,
             gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_ACCURATE,
             gst.SEEK_TYPE_SET, seek,
