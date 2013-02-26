@@ -1,6 +1,9 @@
 # -*- coding:utf-8 -*-
 
 class Player(object):
+    '''
+    time, duration, seek 以秒为单位
+    '''
 
     time = 0
     duration = 0
@@ -13,12 +16,12 @@ class Player(object):
         raise NotImplementedError
 
     def seek(self, seek=None):
-        '''
-        seek 的单位是 nanosecond
-        '''
         return False
 
     def on_eos(self):
+        pass
+
+    def on_err(self):
         pass
 
     def close(self):

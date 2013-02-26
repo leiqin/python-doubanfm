@@ -193,6 +193,7 @@ class Song(api.Song):
             self.like = False
         self.artist = self.data.get('artist')
         self.url = self.data.get('url')
+        self.uri = self.url
         self.album = self.data.get('albumtitle')
         self.publicTime = self.data.get('public_time')
         self.picture = self.data.get('picture')

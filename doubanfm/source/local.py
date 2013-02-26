@@ -43,7 +43,7 @@ class Random(api.Source):
 class Song(api.Song):
 
     def __init__(self, path):
-        self.file = path
+        self.uri = path
         filename = os.path.basename(path)
         index = filename.rfind('.')
         if index != -1:

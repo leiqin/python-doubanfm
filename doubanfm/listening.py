@@ -30,7 +30,6 @@ def init():
     sm = cla(sources) 
     global player
     player = Controller(sm)
-    player.start()
     saveCookieThread = config.SaveCookie()
     saveCookieThread.start()
 

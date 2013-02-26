@@ -4,6 +4,7 @@ import thread
 import sys
 import pyglet.app
 import pyglet.clock
+from pyglet.media.avbin import AVbinException
 import logging
 
 import api
@@ -66,12 +67,16 @@ class PygletPlayer(api.Player):
 
     def play(self, uri=None, seek=None):
         if uri:
-            self.source = pyglet.media.load(uri)
+            try:
+                self.source = pyglet.media.load(uri)
+            except AVbinException:
+                logger.exception('AVbin 加载歌曲文件异常')
+                self.on_err()
+                return
             self.player.pause()
             self.player.next()
             self.player.queue(self.source)
             self.player.play()
-            return
         if seek:
             self.seek(seek)
         if self.player.playing:
@@ -81,7 +86,7 @@ class PygletPlayer(api.Player):
     def seek(self, seek=None):
         if seek:
             self.player.pause()
-            self.player.seek(seek / 1000.0/1000/1000)
+            self.player.seek(seek)
             self.player.play()
         return True
 
@@ -92,10 +97,10 @@ class PygletPlayer(api.Player):
         if name == 'playing':
             return self.player.playing
         elif name == 'time': 
-            return int(self.player.time * 1000*1000*1000)
+            return self.player.time
         elif name == 'duration':
             if self.source:
-                return int(self.source.duration * 1000*1000*1000)
+                return self.source.duration
             else:
                 return 0
         else:
@@ -134,14 +139,15 @@ pyglet.clock.schedule_interval_soft(lambda dt:None, 0.09)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     p = PygletPlayer()
     f = sys.argv[1]
     seek = None
     if len(sys.argv) >= 3:
-        seek = int(sys.argv[2]) * 1000*1000*1000
+        seek = int(sys.argv[2])
     p.play(f, seek)
     print p.duration
-    print p.time
     import time
-    time.sleep(10)
-    
+    while True:
+        print p.time
+        time.sleep(3)

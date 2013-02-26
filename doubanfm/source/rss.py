@@ -222,6 +222,7 @@ class UpdateSongs(object):
         response.close()
         os.close(fd)
         song.file = path
+        song.uri = path
         logger.debug(u'下载完成 <%s> %s', path, song.url)
 
     def update(self):
@@ -236,6 +237,7 @@ class UpdateSongs(object):
                 t = e.get('type')
                 if t and t.startswith('audio/'):
                     song.url = e.get('url')
+                    song.uri = song.url
                     break
             else:
                 continue

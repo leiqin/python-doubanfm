@@ -19,20 +19,14 @@ class Source(object):
 
 class Song(object):
 
+    # 歌曲源
     source = None
-    # local file
-    file = None
-    # network file
-    url = None
+    # 文件 URI
+    uri = None
 
     # set by Player, Source can read it
     time = 0
     duration = 0
-
-    # used by Player, please don't use it in Source
-    isLocal = False
-    tmpfile = None
-    mp3source = None
 
     def info(self):
         raise NotImplementedError

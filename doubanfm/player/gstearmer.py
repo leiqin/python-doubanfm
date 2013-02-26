@@ -32,15 +32,17 @@ class GstPlayer(api.Player):
             elif t == gst.MESSAGE_ERROR:
                 self.player.set_state(gst.STATE_NULL)
                 err, debug = message.parse_error()
-                logger.error("Error: %s" % err, debug)
+                logger.error("Error: %s %s" % (err, debug))
+                self.on_err()
         except Exception:
             logger.exception(u'on_eos 发生异常')
             raise
 
     def play(self, uri=None, seek=None):
         if uri:
-            if not gst.uri_is_valid(sys.argv[1]):
+            if not gst.uri_is_valid(uri):
                 uri = 'file://' + uri
+            logger.debug(uri)
             self.player.set_state(gst.STATE_NULL)
             self.player.set_property('uri', uri)
             self.player.set_state(gst.STATE_PLAYING)
@@ -53,6 +55,8 @@ class GstPlayer(api.Player):
     def seek(self, seek=None):
         if not seek:
             return True
+        # 转换成纳秒
+        seek = seek * 1000*1000*1000
         event = gst.event_new_seek(1.0, gst.FORMAT_TIME,
             gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_ACCURATE,
             gst.SEEK_TYPE_SET, seek,
@@ -69,7 +73,7 @@ class GstPlayer(api.Player):
         while self.available:
             try:
                 position, format = self.player.query_position(gst.FORMAT_TIME)
-                return position
+                return position / 1000.0/1000/1000
             except gst.QueryError:
                 if first:
                     first = False
@@ -84,7 +88,7 @@ class GstPlayer(api.Player):
         while self.available:
             try:
                 duration, format = self.player.query_duration(gst.FORMAT_TIME)
-                return duration
+                return duration / 1000.0/1000/1000
             except gst.QueryError:
                 if first:
                     first = False
@@ -107,16 +111,15 @@ class GstPlayer(api.Player):
 
 
 if __name__ == '__main__':
-    if gst.uri_is_valid(sys.argv[1]):
-        uri = sys.argv[1]
-    else:
-        uri = 'file://' + sys.argv[1]
+    logging.basicConfig(level=logging.DEBUG)
+    uri = sys.argv[1]
     seek = None
     if len(sys.argv) >= 3:
-        seek = int(sys.argv[2]) * 1000 * 1000 * 1000
+        seek = int(sys.argv[2])
     player = GstPlayer()
     player.play(uri, seek)
     print player.duration
-    print player.time
-    time.sleep(10)
+    while True:
+        print player.time
+        time.sleep(3)
 
