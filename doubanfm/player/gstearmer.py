@@ -47,6 +47,9 @@ class GstPlayer(api.Player):
             self.player.set_property('uri', uri)
             self.player.set_state(gst.STATE_PLAYING)
         if seek:
+            # 由于 gstreamer 的 seek , query_position 和 query_duration 
+            # 都是异步的，是通过消息来通信的，刚刚设置好就操作，
+            # 很可能会失败，所以休息 0.1 秒
             time.sleep(0.1)
             self.seek(seek)
         if gst.STATE_PAUSED == self.player.get_state()[1]:
