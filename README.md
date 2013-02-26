@@ -5,7 +5,11 @@ python 豆瓣FM 命令行客户端
 
 启动服务：
 
-    fm -s 2>/dev/null
+    fm -s
+
+开始播放：
+
+	fm -p
 
 下一首：
 
