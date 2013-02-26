@@ -20,12 +20,11 @@ MAX_LIST_SIZE = 10
 MAX_WAIT_TIME = 1024
 MIN_WAIT_TIME = 2
 
-class Player(threading.Thread):
+class Controller(threading.Thread):
 
     song = None
 
     def __init__(self, source=None):
-        pass
         # 由于 pyglet.media 在导入后即便什么也没做
         # 也会在退出时出现警告：
         #

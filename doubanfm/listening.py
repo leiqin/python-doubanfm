@@ -9,7 +9,7 @@ import logging.handlers
 
 from util import initParent, readCmdLine, socketfile, \
         encode, inline, EOFflag, resolve
-from player import Player
+from controller import Controller
 import config, source, source.douban
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ def init():
     sources = config.buildSources(cp)
     sm = cla(sources) 
     global player
-    player = Player(sm)
+    player = Controller(sm)
     player.start()
     saveCookieThread = config.SaveCookie()
     saveCookieThread.start()
