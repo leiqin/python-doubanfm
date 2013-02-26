@@ -358,7 +358,7 @@ if __name__ == "__main__":
 
         def oneline(self):
             return self.file
-    p = Player()
+    p = Controller()
     f = sys.argv[1]
     seek = None
     if len(sys.argv) >= 3:
