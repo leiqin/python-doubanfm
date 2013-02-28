@@ -64,3 +64,17 @@ class Song(api.Song):
 
     def oneline(self):
         return util.decode(self.name)
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    import sys
+    path = sys.argv[1]
+    from doubanfm import config
+    conf = config.Config()
+    conf['path'] = path
+    source = Random(conf)
+    print len(source.songs)
+    for song in source.songs[:10]:
+        print song.info()
+        print ''
