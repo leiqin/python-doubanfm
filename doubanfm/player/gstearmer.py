@@ -46,7 +46,7 @@ class GstPlayer(api.Player):
             self.player.set_state(gst.STATE_NULL)
             self.player.set_property('uri', uri)
             self.player.set_state(gst.STATE_PLAYING)
-        if seek:
+        if seek is not None:
             # 由于 gstreamer 的 seek , query_position 和 query_duration 
             # 都是异步的，是通过消息来通信的，刚刚设置好就操作，
             # 很可能会失败，所以休息 0.1 秒
@@ -56,7 +56,7 @@ class GstPlayer(api.Player):
             self.player.set_state(gst.STATE_PLAYING)
 
     def seek(self, seek=None):
-        if not seek:
+        if seek is None:
             return True
         # 转换成纳秒
         seek = int(seek * 1000*1000*1000)

@@ -77,14 +77,14 @@ class PygletPlayer(api.Player):
             self.player.next()
             self.player.queue(self.source)
             self.player.play()
-        if seek:
+        if seek is not None:
             self.seek(seek)
         if self.player.playing:
             return
         self.player.play()
 
     def seek(self, seek=None):
-        if seek:
+        if seek is not None:
             self.player.pause()
             self.player.seek(seek)
             self.player.play()
