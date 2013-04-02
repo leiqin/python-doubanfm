@@ -141,6 +141,16 @@ class CmdHander(object):
             return u'没有歌曲正在播放'
 
     def list(self, *args):
+        if player.cycling:
+            song = player.song
+            message = None
+            if song:
+                message = song.oneline()
+            if message:
+                return u"单曲循环： " + message
+            else:
+                return u'歌曲列表为空'
+
         songs = player.list()
         message = '\n'.join([song.oneline() for song in songs])
         if message:
@@ -150,6 +160,9 @@ class CmdHander(object):
 
     def update(self, *args):
         player.update()
+
+    def cycling(self, *args):
+        player.cycling = not player.cycling
 
     def channel(self, *args):
         if args:

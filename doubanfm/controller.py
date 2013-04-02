@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import threading
-import sys
+import sys, time
 import urllib2
 import logging
 
 import player.gstearmer
+import player.glet
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ MIN_WAIT_TIME = 2
 class Controller(object):
 
     _song = None
+    cycling = False
 
     @property
     def song(self):
@@ -31,10 +33,15 @@ class Controller(object):
         self.condition = threading.Condition()
         self.source = source
         self.player = player.gstearmer.GstPlayer()
+        self.player = player.glet.PygletPlayer()
         def on_eos():
             if not self.condition.acquire(False):
                 return
             try:
+                if self.cycling:
+                    self.repeat();
+                    return
+
                 # 更新 self._song.time
                 # duration 和 time 用于判断歌曲是否播放到结束
                 # 有时文件头指定的 duration 和歌曲的实际长度并不一致
@@ -42,6 +49,7 @@ class Controller(object):
                 if self._song:
                     self._song.time = self.time
                     self._song.duration = self._song.time
+
                 if not self.source:
                     self.pause()
                     return
@@ -50,6 +58,15 @@ class Controller(object):
                 self.condition.release()
         self.player.on_eos = on_eos
         self.player.on_err = on_eos
+
+    def repeat(self):
+        if not self._song:
+            return
+        with self.condition:
+            if self.player.seek(0):
+                self.player.play()
+            else:
+                self.play(self._song)
 
     def nextSong(self):
         with self.condition:
@@ -65,11 +82,11 @@ class Controller(object):
                         waitTime = waitTime * 2
                     continue
 
-
     def next(self, index=0):
         with self.condition:
             songs = self.songs
             song = None
+            self.cycling = False
             if not index or index < 0 or not songs:
                 # 未指定 index，index 无效，未获取列表就使用 index
                 song = self.nextSong()
@@ -158,6 +175,7 @@ class Controller(object):
                 if m(name):
                     self.songs = []
                     self._song = None
+                    self.cycling = False
                     if self.playing:
                         self.next()
 

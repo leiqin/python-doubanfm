@@ -30,6 +30,8 @@ parser.add_argument('-n', '--next', action='store',
         help="下一首歌曲，可以指定播放第 n 首歌曲，\
                 如果 n 为 0 ，则会获取新的歌曲列表，\
                 这是 豆瓣FM 默认的行为，如果不指定 n 默认为 0")
+parser.add_argument('-C', '--cycling', action='store_const', 
+        const='cycling', dest="cmd", help="单曲循环")
 
 parser.add_argument('-f', '--favourite', action='store_const', 
         const='favourite', dest="cmd", help="喜欢")
