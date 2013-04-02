@@ -6,8 +6,7 @@ import sys, time
 import urllib2
 import logging
 
-import player.gstearmer
-import player.glet
+import player.gstreamer
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +31,7 @@ class Controller(object):
         self._song = None
         self.condition = threading.Condition()
         self.source = source
-        self.player = player.gstearmer.GstPlayer()
-        self.player = player.glet.PygletPlayer()
+        self.player = player.gstreamer.GstPlayer()
         def on_eos():
             if not self.condition.acquire(False):
                 return
