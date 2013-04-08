@@ -3,12 +3,12 @@
 import os, os.path, random
 import logging
 
-import api
-from doubanfm import util
+from .. import util
+from .api import Source, Song
 
 logger = logging.getLogger(__name__)
 
-class Random(api.Source):
+class Random(Source):
     '''
     本地随机源
 
@@ -40,7 +40,7 @@ class Random(api.Source):
         return self.songs[random.randint(0, len(self.songs)-1)]
 
 
-class Song(api.Song):
+class Song(Song):
 
     def __init__(self, path):
         self.uri = path

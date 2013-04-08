@@ -2,12 +2,12 @@
 
 import logging, itertools, collections
 
-import api
-from doubanfm import config
+from .api import Source, Song
+from .. import config
 
 logger = logging.getLogger(__name__)
 
-class SimpleSourceManager(api.Source):
+class SimpleSourceManager(Source):
     '''
     注意： 该类是线程不安全的
     '''
@@ -89,7 +89,7 @@ class SimpleSourceManager(api.Source):
         for source in self.rawSources:
             source.close()
 
-class SimpleChannelSourceManager(api.Source):
+class SimpleChannelSourceManager(Source):
 
     def __init__(self, sources):
         self.rawSources = sources

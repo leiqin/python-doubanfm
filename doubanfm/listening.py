@@ -7,10 +7,10 @@ import socket
 import logging
 import logging.handlers
 
-from util import initParent, readCmdLine, socketfile, \
+from .util import initParent, readCmdLine, socketfile, \
         encode, inline, EOFflag, resolve
-from controller import Controller
-import config, source, source.douban
+from .controller import Controller
+from . import config, source
 
 logger = logging.getLogger(__name__)
 

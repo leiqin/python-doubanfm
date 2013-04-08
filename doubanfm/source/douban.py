@@ -4,12 +4,12 @@
 import urllib, urllib2, json, StringIO, random, string
 import logging
 
-from doubanfm import util, config
-import api
+from .. import util, config
+from .api import Source, Song
 
 logger = logging.getLogger(__name__)
 
-class Douban(api.Source):
+class Douban(Source):
     '''
     豆瓣FM
 
@@ -170,7 +170,7 @@ class Douban(api.Source):
         self.opener.close()
         
 
-class Song(api.Song):
+class Song(Song):
 
     source = None
     time = 0

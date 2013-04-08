@@ -8,11 +8,11 @@ import gst, sys, time
 import thread
 import logging
 
-import api
+from .api import Player
 
 logger = logging.getLogger(__name__)
 
-class GstPlayer(api.Player):
+class GstPlayer(Player):
 
     def __init__(self):
         self.player = gst.element_factory_make('playbin', None)

@@ -3,7 +3,7 @@
 import threading, Queue
 import logging
 
-import config
+from . import config
 
 logger = logging.getLogger(__name__)
 

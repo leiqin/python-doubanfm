@@ -7,7 +7,7 @@ import logging
 import threading
 import time
 
-import util, cookie
+from . import util, cookie
 
 logger = logging.getLogger(__name__)
 
