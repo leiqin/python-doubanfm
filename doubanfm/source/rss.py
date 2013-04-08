@@ -5,12 +5,12 @@ import os, os.path, urllib2, copy, pickle
 import logging, tempfile
 from collections import OrderedDict
 
-import api
-from doubanfm import util, config, threadpool
+from .. import util, config, threadpool
+from .api import Source, Song
 
 logger = logging.getLogger(__name__)
 
-class RSS(api.Source):
+class RSS(Source):
     '''
     配置选项：
         rss (必须) <string> RSS 源的网址
@@ -252,7 +252,7 @@ class UpdateSongs(object):
         songs.reverse()
         return songs
 
-class Song(api.Song):
+class Song(Song):
 
     def __init__(self):
         pass

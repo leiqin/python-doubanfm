@@ -7,11 +7,11 @@ import pyglet.clock
 from pyglet.media.avbin import AVbinException
 import logging
 
-import api
+from .api import Player
 
 logger = logging.getLogger(__name__)
 
-class PygletPlayer(api.Player):
+class PygletPlayer(Player):
 
     def __init__(self):
         # 由于 pyglet.media 在导入后即便什么也没做

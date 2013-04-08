@@ -3,8 +3,8 @@
 import lxml.etree as etree
 import logging, urlparse
 
-import rss
-from doubanfm import util, config
+from .. import util, config
+from . import rss
 
 logger = logging.getLogger(__name__)
 
