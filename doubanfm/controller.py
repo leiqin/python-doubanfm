@@ -6,7 +6,7 @@ import sys, time
 import urllib2
 import logging
 
-from .player.gstearmer import GstPlayer
+from .player.gstreamer import GstPlayer
 
 logger = logging.getLogger(__name__)
 
