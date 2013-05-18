@@ -36,6 +36,6 @@ python 豆瓣FM 命令行客户端
     fm -x
 
 
-可以用 Firecookie 导出 firefox 的 cookie 到 ~/.cache/python-doubanfm/cookies.txt
+可以用 Firebug 导出 firefox 的 cookie 到 ~/.cache/python-doubanfm/cookies.txt
 这样就可以用 喜欢/不喜欢 的功能了
 

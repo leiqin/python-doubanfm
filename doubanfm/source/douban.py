@@ -224,15 +224,15 @@ class Song(Song):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     conf = config.Config()
-#    conf['cookiefile'] = '/home/leiqin/.cache/python-doubanfm/cookies.txt'
+    conf['cookiefile'] = '/home/leiqin/.cache/python-doubanfm/cookies.txt'
     douban = Douban(conf)
-    song = douban.next()
-    print song.info()
-    print song.url
-#    req = urllib2.Request('http://douban.fm/mine?typed=liked')
-#    f = douban.opener.open(req)
-#    print req.headers
-#    print req.unredirected_hdrs
-#    r = f.read()
-#    print r
+#    song = douban.next()
+#    print song.info()
+#    print song.url
+    req = urllib2.Request('http://douban.fm/mine?typed=liked')
+    f = douban.opener.open(req)
+    print req.headers
+    print req.unredirected_hdrs
+    r = f.read()
+    print r
     douban.close()

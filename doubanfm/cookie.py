@@ -38,16 +38,11 @@ class FirecookieCookieJar(FileCookieJar):
                 secure = arr.pop(0)
                 expires = arr.pop(0)
 
-                try:
-                    t = time.strptime(expires, self.timeformat)
-                    expires = time.mktime(t)
-                except Exception:
-                    arr.insert(0, expires)
-                    expires = None
-
                 name = arr.pop(0)
                 if arr:
                     value = arr.pop(0)
+                else:
+                    value = None
 
                 secure = (secure == "TRUE")
                 domain_specified = (domain_specified == "TRUE")
@@ -102,11 +97,9 @@ class FirecookieCookieJar(FileCookieJar):
                 if cookie.domain.startswith("."): initial_dot = "TRUE"
                 else: initial_dot = "FALSE"
                 if cookie.expires is not None:
-                    # expires = str(cookie.expires)
-                    t = time.localtime(cookie.expires)
-                    expires = time.strftime(self.timeformat, t)
+                    expires = str(cookie.expires)
                 else:
-                    expires = ""
+                    expires = "0"
                 if cookie.value is None:
                     # cookies.txt regards 'Set-Cookie: foo' as a cookie
                     # with no name, whereas cookielib regards it as a
