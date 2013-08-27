@@ -259,12 +259,12 @@ class Song(Song):
 
 	def info(self):
 		result = []
-		result.append('Title	 : %s' % self.title)
-		result.append('Public	 : %s' % self.pubDate)
+		result.append('Title     : %s' % self.title)
+		result.append('Public    : %s' % self.pubDate)
 		if self.source:
-			result.append('Source	 : %s' % self.source.name)
+			result.append('Source    : %s' % self.source.name)
 		if self.time and self.duration:
-			result.append('Time		 : %s' % util.showtime(self.time))
+			result.append('Time      : %s' % util.showtime(self.time))
 			result.append('Duration  : %s' % util.showtime(self.duration))
 		return '\n'.join(result)
 
@@ -284,4 +284,5 @@ if __name__ == '__main__':
 	call()
 	for song in source.songs.values():
 		print song.info()
+		print song.uri
 		print ''

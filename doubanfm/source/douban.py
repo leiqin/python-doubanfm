@@ -202,37 +202,40 @@ class Song(Song):
 			self.length = float(self.length)
 
 	def info(self):
-		output = StringIO.StringIO()
-		output.write('Title		: %s\n' % self.title)
-		output.write('Artist	: %s\n' % self.artist)
-		output.write('Like		: %s\n' % self.like)
-		output.write('Album		: %s\n' % self.album)
+		result = []
+		result.append('Title     : %s' % self.title)
+		result.append('Artist    : %s' % self.artist)
+		result.append('Like      : %s' % self.like)
+		result.append('Album     : %s' % self.album)
 		if self.publicTime:
-			output.write('Public	: %s\n' % self.publicTime)
+			result.append('Public    : %s' % self.publicTime)
 		if self.source:
-			output.write(u'Source	 : %s\n' % self.source.name)
+			result.append(u'Source    : %s' % self.source.name)
 		if self.time and self.duration:
-			output.write('Time		: %s\n' % util.showtime(self.time))
-			output.write('Duration	: %s\n' % util.showtime(self.duration))
-		result = output.getvalue()
-		output.close()
-		return result
+			result.append('Time      : %s' % util.showtime(self.time))
+			result.append('Duration  : %s' % util.showtime(self.duration))
+		return '\n'.join(result)
 
 	def oneline(self):
 		return ''.join([self.title, ' <', self.artist, '>'])
 
 if __name__ == '__main__':
+	import sys
 	logging.basicConfig(level=logging.DEBUG)
 	conf = config.Config()
 	conf['cookiefile'] = '/home/leiqin/.cache/python-doubanfm/cookies.txt'
 	douban = Douban(conf)
-#	 song = douban.next()
-#	 print song.info()
-#	 print song.url
-	req = urllib2.Request('http://douban.fm/mine?typed=liked')
-	f = douban.opener.open(req)
-	print req.headers
-	print req.unredirected_hdrs
-	r = f.read()
-	print r
-	douban.close()
+	if len(sys.argv) >= 2 and sys.argv[1] == 'liked':
+		req = urllib2.Request('http://douban.fm/mine?typed=liked')
+		f = douban.opener.open(req)
+		print req.headers
+		print req.unredirected_hdrs
+		r = f.read()
+		print r
+		douban.close()
+	else:
+		for i in range(5):
+			song = douban.next()
+			print song.info()
+			print song.url
+			print ''

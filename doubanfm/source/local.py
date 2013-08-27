@@ -54,11 +54,11 @@ class Song(Song):
 
 	def info(self):
 		result = []
-		result.append(u'Title	  : %s' % self.name)
+		result.append(u'Title     : %s' % self.name)
 		if self.source:
-			result.append(u'Source	  : %s' % self.source.name)
+			result.append(u'Source    : %s' % self.source.name)
 		if self.time and self.duration:
-			result.append(u'Time	  : %s' % util.showtime(self.time))
+			result.append(u'Time      : %s' % util.showtime(self.time))
 			result.append(u'Duration  : %s' % util.showtime(self.duration))
 		return '\n'.join(result)
 
@@ -74,7 +74,8 @@ if __name__ == '__main__':
 	conf = config.Config()
 	conf['path'] = path
 	source = Random(conf)
-	print len(source.songs)
-	for song in source.songs[:10]:
+	print 'All songs %s' % len(source.songs)
+	for song in source.songs[:5]:
 		print song.info()
+		print song.uri
 		print ''

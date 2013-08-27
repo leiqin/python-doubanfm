@@ -92,4 +92,5 @@ if __name__ == '__main__':
 	call()
 	for song in source.songs.values():
 		print song.info()
+		print song.uri
 		print ''
