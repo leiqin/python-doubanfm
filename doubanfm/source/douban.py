@@ -52,12 +52,18 @@ class Douban(Source):
 				return
 			except UnicodeDecodeError:
 				# 有时候 json 会有不是 utf-8 的字符
-				logger.debug(u'解析歌曲列表 JSON 异常 url = %s', util.decode(response.geturl()))
+				if response:
+					logger.debug(u'解析歌曲列表 JSON 异常 url = %s', util.decode(response.geturl()))
+				else:
+					logger.debug('response is None')
 				logger.debug(response.headers)
 				logger.debug(data)
 				continue
 			except Exception:
-				logger.exception(u'解析歌曲列表异常 url = %s', util.decode(response.geturl()))
+				if response:
+					logger.exception(u'解析歌曲列表异常 url = %s', util.decode(response.geturl()))
+				else:
+					logger.debug('response is None')
 				logger.error(response.headers)
 				logger.error(data)
 				raise
