@@ -13,7 +13,8 @@ from doubanfm.util import cachedir, socketfile, stdout, stderr, \
 
 parser = argparse.ArgumentParser(description="命令行的 豆瓣FM ，\
         可以使用 Firecookie(firefox 的插件) 导出的 cookie 文件，\
-        默认路径为 %s/cookies.txt " % cachedir)
+        cookie 文件的默认路径为 %s/cookies.txt ，可以在配置文件 \
+		~/.config/python-doubanfm/doubanfm.conf 中进行配置" % cachedir)
 
 parser.add_argument('-s', '--server', action='store_true', 
         help="启动服务")
