@@ -16,6 +16,13 @@ class GstPlayer(Player):
 
 	def __init__(self):
 		self.player = gst.element_factory_make('playbin', None)
+
+		# 设置 playbin 的 video-sink 为一个伪造的 sink，避免在播放视频时弹窗
+		# (PS: 有些 豆瓣FM 的广告是视频的)
+		# http://pygstdocs.berlios.de/pygst-tutorial/playbin.html
+		fakesink = gst.element_factory_make("fakesink", "fakesink")
+		self.player.set_property("video-sink", fakesink)
+
 		bus = self.player.get_bus()
 		bus.add_signal_watch()
 		bus.connect('message' , self.on_message)
