@@ -55,17 +55,17 @@ class Douban(Source):
 				if response:
 					logger.debug(u'解析歌曲列表 JSON 异常 url = %s', util.decode(response.geturl()))
 					logger.debug(response.headers)
+					logger.debug(data)
 				else:
 					logger.debug('response is None')
-				logger.debug(data)
 				continue
 			except Exception:
 				if response:
 					logger.exception(u'解析歌曲列表异常 url = %s', util.decode(response.geturl()))
 					logger.error(response.headers)
+					logger.error(data)
 				else:
 					logger.debug('response is None')
-				logger.error(data)
 				raise
 			finally:
 				if response:
