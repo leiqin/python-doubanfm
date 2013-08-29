@@ -54,17 +54,17 @@ class Douban(Source):
 				# 有时候 json 会有不是 utf-8 的字符
 				if response:
 					logger.debug(u'解析歌曲列表 JSON 异常 url = %s', util.decode(response.geturl()))
+					logger.debug(response.headers)
 				else:
 					logger.debug('response is None')
-				logger.debug(response.headers)
 				logger.debug(data)
 				continue
 			except Exception:
 				if response:
 					logger.exception(u'解析歌曲列表异常 url = %s', util.decode(response.geturl()))
+					logger.error(response.headers)
 				else:
 					logger.debug('response is None')
-				logger.error(response.headers)
 				logger.error(data)
 				raise
 			finally:
