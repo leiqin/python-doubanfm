@@ -20,7 +20,7 @@ class FirecookieCookieJar(FileCookieJar):
 				if line == "": break
 
 				# last field may be absent, so keep any trailing tab
-				if line.endswith("\n"): line = line[:-2]
+				if line.endswith("\n"): line = line[:-1]
 
 				# skip comments and blank lines XXX what is $ for?
 				if (line.strip().startswith(("#", "$")) or
