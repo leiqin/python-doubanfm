@@ -20,15 +20,22 @@ class FirecookieCookieJar(FileCookieJar):
 				if line == "": break
 
 				# last field may be absent, so keep any trailing tab
-				if line.endswith("\n"): line = line[:-1]
+				if line.endswith("\n"): line = line[:-2]
 
 				# skip comments and blank lines XXX what is $ for?
 				if (line.strip().startswith(("#", "$")) or
 					line.strip() == ""):
 					continue
 
-#				 domain, domain_specified, path, secure, expires, name, value = \
-#						 line.split("\t")
+				# domain, domain_specified, path, secure, expires, name, value = \
+				#		 line.split("\t")
+
+				# 2013-09-07 Firebug 导出的 cookies.txt 格式如下：
+				#
+				# .douban.fm	TRUE	/	FALSE	1403077533	undefined	openExpPan	Y
+				#
+				# 和原来相比多了 undefined 这一列(PS: 不太清楚是干什么的)
+				# 与 curl 使用的 cookie 文件格式不兼容，需要去掉这一列才能用于 curl
 
 				arr = line.strip().split("\t")
 
@@ -38,10 +45,11 @@ class FirecookieCookieJar(FileCookieJar):
 				secure = arr.pop(0)
 				expires = arr.pop(0)
 
-				name = arr.pop(0)
+				value = arr.pop()
 				if arr:
-					value = arr.pop(0)
+					name = arr.pop()
 				else:
+					name = value
 					value = None
 
 				secure = (secure == "TRUE")
