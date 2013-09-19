@@ -69,9 +69,10 @@ class UpdateSongs(rss.UpdateSongs):
 			pubDate = div.find('div[@class="subtitle"]/span[@class="date"]')
 			song.pubDate = pubDate.text
 			mp3 = div.find('.//div[@class="mp3_links"]/a')
-			song.url = urlparse.urljoin(url, mp3.get('href'))
-			song.uri = song.url
-			songs.append(song)
+			if mp3:
+				song.url = urlparse.urljoin(url, mp3.get('href'))
+				song.uri = song.url
+				songs.append(song)
 			if not self.last_id and len(songs) >= self.init_count:
 				break
 
