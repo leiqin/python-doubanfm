@@ -69,7 +69,7 @@ class UpdateSongs(rss.UpdateSongs):
 			pubDate = div.find('div[@class="subtitle"]/span[@class="date"]')
 			song.pubDate = pubDate.text
 			mp3 = div.find('.//div[@class="mp3_links"]/a')
-			if mp3:
+			if mp3 is not None:
 				song.url = urlparse.urljoin(url, mp3.get('href'))
 				song.uri = song.url
 				songs.append(song)
