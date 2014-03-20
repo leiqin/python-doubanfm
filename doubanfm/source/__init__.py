@@ -98,7 +98,10 @@ class SimpleChannelSourceManager(Source):
 		for source in self.rawSources:
 			self.channels['all'].addSource(source)
 			for c in source.conf.get('channel', '').split(','):
-				if not c or c == 'all':
+				if not c:
+					continue
+				c = c.strip()
+				if c == 'all':
 					continue
 				self.channels[c].addSource(source)
 
