@@ -63,11 +63,12 @@ class UpdateSongs(rss.UpdateSongs):
 			song = rss.Song()
 			song.id = url
 			song.title = item.text.strip()
+                        logger.debug(u'item url : %s', url)
 			response = self.opener.open(url, timeout=config.getint('timeout', 30))
 			html = etree.parse(response, etree.HTMLParser())
 			div = html.find('//div[@id="columnfirstnei2"]')
 			pubDate = div.find('div[@class="subtitle"]/span[@class="date"]')
-			song.pubDate = pubDate.text
+			song.pubDate = pubDate.text.replace('\n', ' ')
 			mp3 = div.find('.//div[@class="mp3_links"]/a')
 			if mp3 is not None:
 				song.url = urlparse.urljoin(url, mp3.get('href'))
