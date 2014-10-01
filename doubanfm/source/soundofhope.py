@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import lxml.etree as etree
-import logging, urlparse
+import logging, urlparse, re
 
 from .. import util, config
 from . import rss
@@ -68,7 +68,7 @@ class UpdateSongs(rss.UpdateSongs):
 			html = etree.parse(response, etree.HTMLParser())
 			div = html.find('//div[@id="columnfirstnei2"]')
 			pubDate = div.find('div[@class="subtitle"]/span[@class="date"]')
-			song.pubDate = pubDate.text.replace('\n', ' ')
+			song.pubDate = re.sub(r'\s+', ' ', pubDate)
 			mp3 = div.find('.//div[@class="mp3_links"]/a')
 			if mp3 is not None:
 				song.url = urlparse.urljoin(url, mp3.get('href'))
