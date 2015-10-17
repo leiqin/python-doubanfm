@@ -68,7 +68,7 @@ class UpdateSongs(rss.UpdateSongs):
             html = etree.parse(response, etree.HTMLParser())
             article = html.find('//article')
             pubDate = article.find('p[@class="post-meta"]/span[@class="post-date"]')
-            song.pubDate = pubDate.itertext().next()
+            song.pubDate = ''.join(pubDate.itertext())
             mp3 = article.find('.//div[@class="mp3_links"]/a')
             if mp3 is not None:
                 song.url = urlparse.urljoin(url, mp3.get('href'))
