@@ -18,6 +18,8 @@ parser = argparse.ArgumentParser(description="命令行的 豆瓣FM ，\
 
 parser.add_argument('-s', '--server', action='store_true', 
         help="启动服务")
+parser.add_argument('-d', '--daemon', action='store_true', 
+        help="daemon 模式，和 --server 一起使用")
 
 parser.add_argument('-p', '--play', action='store_const', 
         const='play', dest="cmd", help="播放")
@@ -97,7 +99,15 @@ if args.server:
     if serverHasStart():
         print '服务已经启动，如果服务并未启动请执行 rm %s' % socketfile
         sys.exit()
-    if not os.fork():
+    if args.daemon:
+        if not os.fork():
+            initParent(stdout)
+            initParent(stderr)
+            sys.stdout = open(stdout, 'w')
+            sys.stderr = open(stderr, 'w')
+            import doubanfm.listening
+            doubanfm.listening.start()
+    else:
         initParent(stdout)
         initParent(stderr)
         sys.stdout = open(stdout, 'w')
