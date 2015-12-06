@@ -37,15 +37,17 @@ class UpdateSongs(rss.UpdateSongs):
         label_l2 = util.decode(self.source.conf.get('label_l2'))
         response = self.opener.open(home, timeout=config.getint('timeout', 30))
         html = etree.parse(response, etree.HTMLParser())
-        for l1 in html.findall('//div[@class="submenu-wrap"]'):
-            a = l1.find('h3/a')  
+        for l1 in html.findall('//div[@class="container"]/div/ul/li'):
+            a = l1.find('a')  
+            if a is None or a.text is None:
+                continue
             if a.text.find(label_l1) != -1:
                 break
         else:
             logger.warning(u'没有找到一级标签 label_l1 = %s', label_l1)
             return songs
 
-        for l2 in l1.findall('ul/li/a'):
+        for l2 in l1.findall('div/ul/li/a'):
             if l2.text.find(label_l2) != -1:
                 break
         else:
@@ -69,11 +71,18 @@ class UpdateSongs(rss.UpdateSongs):
             article = html.find('//article')
             pubDate = article.find('p[@class="post-meta"]/span[@class="post-date"]')
             song.pubDate = ''.join(pubDate.itertext())
-            mp3 = article.find('.//div[@class="mp3_links"]/a')
+            logger.debug(u'item pubDate : %s', song.pubDate)
+            for mp3 in article.findall('.//div/a'):
+                if mp3 is None or mp3.text is None:
+                    continue
+                if mp3.text.find(u'下载链接') != -1:
+                    break
             if mp3 is not None:
                 song.url = urlparse.urljoin(url, mp3.get('href'))
                 song.uri = song.url
                 songs.append(song)
+            else:
+                logger.debug(u'item mp3 is None : %s', url)
             if not self.last_id and len(songs) >= self.init_count:
                 break
 
