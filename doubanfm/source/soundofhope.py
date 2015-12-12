@@ -75,8 +75,10 @@ class UpdateSongs(rss.UpdateSongs):
             for mp3 in article.findall('.//div/a'):
                 if mp3 is None or mp3.text is None:
                     continue
-                if mp3.text.find(u'下载链接') != -1:
+                if mp3.text.find(u'下载连接') != -1:
                     break
+            else:
+                mp3 = None
             if mp3 is not None:
                 song.url = urlparse.urljoin(url, mp3.get('href'))
                 song.uri = song.url
