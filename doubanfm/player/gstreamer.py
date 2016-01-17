@@ -12,8 +12,8 @@ from .api import Player
 
 logger = logging.getLogger(__name__)
 
-class GstPlayer(Player):
 
+class GstPlayer(Player):
     def __init__(self):
         self.player = gst.element_factory_make('playbin', None)
 
@@ -25,10 +25,9 @@ class GstPlayer(Player):
 
         bus = self.player.get_bus()
         bus.add_signal_watch()
-        bus.connect('message' , self.on_message)
+        bus.connect('message', self.on_message)
         self.loop = gobject.MainLoop()
         thread.start_new_thread(self.loop.run, ())
-
 
     def on_message(self, bus, message):
         try:
@@ -66,11 +65,10 @@ class GstPlayer(Player):
         if seek is None:
             return True
         # 转换成纳秒
-        seek = int(seek * 1000*1000*1000)
-        event = gst.event_new_seek(1.0, gst.FORMAT_TIME,
-            gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_ACCURATE,
-            gst.SEEK_TYPE_SET, seek,
-            gst.SEEK_TYPE_NONE, 0)
+        seek = int(seek * 1000 * 1000 * 1000)
+        event = gst.event_new_seek(1.0, gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH
+                                   | gst.SEEK_FLAG_ACCURATE, gst.SEEK_TYPE_SET,
+                                   seek, gst.SEEK_TYPE_NONE, 0)
         return self.player.send_event(event)
 
     def pause(self):
@@ -83,7 +81,7 @@ class GstPlayer(Player):
         while self.available:
             try:
                 position, format = self.player.query_position(gst.FORMAT_TIME)
-                return position / 1000.0/1000/1000
+                return position / 1000.0 / 1000 / 1000
             except gst.QueryError:
                 if first:
                     first = False
@@ -98,7 +96,7 @@ class GstPlayer(Player):
         while self.available:
             try:
                 duration, format = self.player.query_duration(gst.FORMAT_TIME)
-                return duration / 1000.0/1000/1000
+                return duration / 1000.0 / 1000 / 1000
             except gst.QueryError:
                 if first:
                     first = False
@@ -132,4 +130,3 @@ if __name__ == '__main__':
     while True:
         print player.time
         time.sleep(3)
-

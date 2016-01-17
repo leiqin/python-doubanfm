@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 _defaultThreadPool = None
 
+
 def init():
     global _defaultThreadPool
     if _defaultThreadPool:
@@ -16,17 +17,19 @@ def init():
     threshold = config.getint('update_threshold', 1)
     _defaultThreadPool = ThreadPool(name='UpdateRSS', threshold=threshold)
 
+
 def submit(target):
     if not _defaultThreadPool:
         init()
     _defaultThreadPool.submit(target)
 
+
 def close(target):
     if _defaultThreadPool:
         _defaultThreadPool.close()
 
-class ThreadPool(object):
 
+class ThreadPool(object):
     def __init__(self, name='default', threshold=1, daemon=True):
         logger.debug(u'初始化线程池 %s' % name)
         self.name = name
@@ -50,8 +53,8 @@ class ThreadPool(object):
         for i in range(self.threshold):
             self.queue.put(self.closeFlag)
 
-class Worker(threading.Thread):
 
+class Worker(threading.Thread):
     def __init__(self, name, queue, closeFlag, daemon=True):
         threading.Thread.__init__(self)
         self.name = name
@@ -70,4 +73,3 @@ class Worker(threading.Thread):
                 target()
             except Exception:
                 logger.error(u'线程池 %s 发生异常' % self.name)
-

@@ -11,8 +11,8 @@ from .api import Player
 
 logger = logging.getLogger(__name__)
 
-class PygletPlayer(Player):
 
+class PygletPlayer(Player):
     def __init__(self):
         # 由于 pyglet.media 在导入后即便什么也没做
         # 也会在退出时出现警告：
@@ -54,7 +54,7 @@ class PygletPlayer(Player):
         def dispatch_events(dt=None):
             pyglet.media.Player.dispatch_events(self.player, dt)
             if self.player._audio.UPDATE_PERIOD < default_update_period * 0.5:
-                self.player._audio.UPDATE_PERIOD = default_update_period 
+                self.player._audio.UPDATE_PERIOD = default_update_period
             if self.player._audio.__class__.UPDATE_PERIOD < default_update_period * 0.5:
                 self.player._audio.__class__UPDATE_PERIOD = default_update_period
 
@@ -96,7 +96,7 @@ class PygletPlayer(Player):
     def __getattribute__(self, name):
         if name == 'playing':
             return self.player.playing
-        elif name == 'time': 
+        elif name == 'time':
             return self.player.time
         elif name == 'duration':
             if self.source:
@@ -135,8 +135,7 @@ class PygletPlayer(Player):
 #   ... ...
 #
 # 然后，就没有然后了 ...
-pyglet.clock.schedule_interval_soft(lambda dt:None, 0.09)
-
+pyglet.clock.schedule_interval_soft(lambda dt: None, 0.09)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

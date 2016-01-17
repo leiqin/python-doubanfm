@@ -16,59 +16,113 @@ parser = argparse.ArgumentParser(description="命令行的 豆瓣FM ，\
         cookie 文件的默认路径为 %s/cookies.txt ，可以在配置文件 \
         ~/.config/python-doubanfm/doubanfm.conf 中进行配置" % cachedir)
 
-parser.add_argument('-s', '--server', action='store_true', 
-        help="启动服务")
-parser.add_argument('-d', '--daemon', action='store_true', 
-        help="daemon 模式，和 --server 一起使用")
+parser.add_argument('-s', '--server', action='store_true', help="启动服务")
+parser.add_argument('-d',
+                    '--daemon',
+                    action='store_true',
+                    help="daemon 模式，和 --server 一起使用")
 
-parser.add_argument('-p', '--play', action='store_const', 
-        const='play', dest="cmd", help="播放")
-parser.add_argument('-P', '--pause', action='store_const', 
-        const='pause', dest="cmd", help="暂停")
-parser.add_argument('-G', '--toggle-pause', action='store_const', 
-        const='togglePause', dest="cmd", help="播放/暂停")
+parser.add_argument('-p',
+                    '--play',
+                    action='store_const',
+                    const='play',
+                    dest="cmd",
+                    help="播放")
+parser.add_argument('-P',
+                    '--pause',
+                    action='store_const',
+                    const='pause',
+                    dest="cmd",
+                    help="暂停")
+parser.add_argument('-G',
+                    '--toggle-pause',
+                    action='store_const',
+                    const='togglePause',
+                    dest="cmd",
+                    help="播放/暂停")
 
-parser.add_argument('-n', '--next', action='store',
-        nargs='?', const=0, type=int, 
-        help="下一首歌曲，可以指定播放第 n 首歌曲，\
+parser.add_argument('-n',
+                    '--next',
+                    action='store',
+                    nargs='?',
+                    const=0,
+                    type=int,
+                    help="下一首歌曲，可以指定播放第 n 首歌曲，\
                 如果 n 为 0 ，则会获取新的歌曲列表，\
                 这是 豆瓣FM 默认的行为，如果不指定 n 默认为 0")
-parser.add_argument('-C', '--cycling', action='store_const', 
-        const='cycling', dest="cmd", help="单曲循环")
+parser.add_argument('-C',
+                    '--cycling',
+                    action='store_const',
+                    const='cycling',
+                    dest="cmd",
+                    help="单曲循环")
 
-parser.add_argument('-f', '--favourite', action='store_const', 
-        const='favourite', dest="cmd", help="喜欢")
-parser.add_argument('-u', '--unfavourite', action='store_const', 
-        const='unFavourite', dest="cmd", help="不喜欢")
+parser.add_argument('-f',
+                    '--favourite',
+                    action='store_const',
+                    const='favourite',
+                    dest="cmd",
+                    help="喜欢")
+parser.add_argument('-u',
+                    '--unfavourite',
+                    action='store_const',
+                    const='unFavourite',
+                    dest="cmd",
+                    help="不喜欢")
 
-parser.add_argument('-i', '--info', action='store_const',
-        const='info', dest='cmd', help="当前歌曲信息")
-parser.add_argument('-l', '--list', action='store_const',
-        const='list', dest='cmd',  help="歌曲列表")
+parser.add_argument('-i',
+                    '--info',
+                    action='store_const',
+                    const='info',
+                    dest='cmd',
+                    help="当前歌曲信息")
+parser.add_argument('-l',
+                    '--list',
+                    action='store_const',
+                    const='list',
+                    dest='cmd',
+                    help="歌曲列表")
 
-parser.add_argument('-x', '--exit', action='store_const', 
-        const='exit', dest="cmd", help="关闭服务")
+parser.add_argument('-x',
+                    '--exit',
+                    action='store_const',
+                    const='exit',
+                    dest="cmd",
+                    help="关闭服务")
 
-parser.add_argument('-U', '--update', action='store_const',
-        const='update', dest='cmd', help='更新 RSS')
+parser.add_argument('-U',
+                    '--update',
+                    action='store_const',
+                    const='update',
+                    dest='cmd',
+                    help='更新 RSS')
 
 LIST_CHANNEL = 'listChannel'
-parser.add_argument('-c', '--channel', nargs='?', action='store',
-        const=LIST_CHANNEL, dest='channel', 
-        help='选择某个频道，如果没有指定频道，则会列出所有可选的频道')
+parser.add_argument('-c',
+                    '--channel',
+                    nargs='?',
+                    action='store',
+                    const=LIST_CHANNEL,
+                    dest='channel',
+                    help='选择某个频道，如果没有指定频道，则会列出所有可选的频道')
 
-parser.add_argument('-r', '--reply', action='store_true',
-        help='等待应答信息，-i -l 本来就会等待应答')
+parser.add_argument('-r',
+                    '--reply',
+                    action='store_true',
+                    help='等待应答信息，-i -l 本来就会等待应答')
 
 args = parser.parse_args()
 
+
 def serverHasStart():
     return os.path.exists(socketfile)
+
 
 def getsocket():
     s = socket.socket(socket.AF_UNIX)
     s.connect(socketfile)
     return s
+
 
 def sendcmd(cmd, waitReply, *args):
     s = getsocket()
@@ -117,10 +171,10 @@ if args.server:
 elif args.next is not None:
     if serverHasStart():
         index = int(args.next)
-        index = max(0 , index)
+        index = max(0, index)
         sendcmd('next', args.reply, index)
     else:
-        print >>sys.stderr, '服务尚未启动'
+        print >> sys.stderr, '服务尚未启动'
 elif args.cmd:
     if serverHasStart():
         if args.cmd in ['info', 'list']:
@@ -128,7 +182,7 @@ elif args.cmd:
         else:
             sendcmd(args.cmd, args.reply)
     else:
-        print >>sys.stderr, '服务尚未启动'
+        print >> sys.stderr, '服务尚未启动'
 elif args.channel:
     if serverHasStart():
         if args.channel == LIST_CHANNEL:

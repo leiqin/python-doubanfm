@@ -7,6 +7,7 @@ from .. import config
 
 logger = logging.getLogger(__name__)
 
+
 class SimpleSourceManager(Source):
     '''
     注意： 该类是线程不安全的
@@ -89,8 +90,8 @@ class SimpleSourceManager(Source):
         for source in self.rawSources:
             source.close()
 
-class SimpleChannelSourceManager(Source):
 
+class SimpleChannelSourceManager(Source):
     def __init__(self, sources):
         self.rawSources = sources
         self.channels = collections.defaultdict(SimpleSourceManager)

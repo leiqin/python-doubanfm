@@ -7,6 +7,7 @@ import cookielib
 from cookielib import (_warn_unhandled_exception, FileCookieJar, LoadError,
                        Cookie, MISSING_FILENAME_TEXT)
 
+
 class FirecookieCookieJar(FileCookieJar):
 
     timeformat = '%a, %d %b %Y %H:%M:%S %Z'
@@ -23,8 +24,7 @@ class FirecookieCookieJar(FileCookieJar):
                 if line.endswith("\n"): line = line[:-1]
 
                 # skip comments and blank lines XXX what is $ for?
-                if (line.strip().startswith(("#", "$")) or
-                    line.strip() == ""):
+                if (line.strip().startswith(("#", "$")) or line.strip() == ""):
                     continue
 
                 # domain, domain_specified, path, secure, expires, name, value = \
@@ -64,16 +64,9 @@ class FirecookieCookieJar(FileCookieJar):
                     discard = True
 
                 # assume path_specified is false
-                c = Cookie(0, name, value,
-                           None, False,
-                           domain, domain_specified, initial_dot,
-                           path, False,
-                           secure,
-                           expires,
-                           discard,
-                           None,
-                           None,
-                           {})
+                c = Cookie(0, name, value, None, False, domain,
+                           domain_specified, initial_dot, path, False, secure,
+                           expires, discard, None, None, {})
                 if not ignore_discard and c.discard:
                     continue
                 if not ignore_expires and c.is_expired(now):
@@ -117,30 +110,29 @@ class FirecookieCookieJar(FileCookieJar):
                 else:
                     name = cookie.name
                     value = cookie.value
-                f.write(
-                    "\t".join([a for a in [cookie.domain, initial_dot, cookie.path,
-                               secure, expires, name, value] if a ])+
-                    "\n")
+                f.write("\t".join(
+                    [a
+                     for a in [cookie.domain, initial_dot, cookie.path, secure,
+                               expires, name, value] if a]) + "\n")
         finally:
             f.close()
 
-    
     # 不清除过期的cookie
     clearExpried = False
+
     def clear_expired_cookies(self):
         if self.clearExpried:
             cookielib.CookieJar.clear_expired_cookies(self)
 
-class MyCookiePolicy(cookielib.DefaultCookiePolicy):
 
+class MyCookiePolicy(cookielib.DefaultCookiePolicy):
     def return_ok(self, cookie, request):
 
         # 不验证是否过期
         # for n in "version", "verifiability", "secure", "expires", "port", "domain":
         for n in "version", "verifiability", "secure", "port", "domain":
-            fn_name = "return_ok_"+n
+            fn_name = "return_ok_" + n
             fn = getattr(self, fn_name)
             if not fn(cookie, request):
                 return False
         return True
-

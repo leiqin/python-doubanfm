@@ -8,6 +8,7 @@ from . import rss
 
 logger = logging.getLogger(__name__)
 
+
 class SoundOfHope(rss.RSS):
     '''
     希望之声 http://soundofhope.org
@@ -28,8 +29,8 @@ class SoundOfHope(rss.RSS):
     def updateCallable(self):
         return UpdateSongs(self)
 
-class UpdateSongs(rss.UpdateSongs):
 
+class UpdateSongs(rss.UpdateSongs):
     def update(self):
         songs = []
         home = 'http://soundofhope.org'
@@ -38,7 +39,7 @@ class UpdateSongs(rss.UpdateSongs):
         response = self.opener.open(home, timeout=config.getint('timeout', 30))
         html = etree.parse(response, etree.HTMLParser())
         for l1 in html.findall('//div[@class="container"]/div/ul/li'):
-            a = l1.find('a')  
+            a = l1.find('a')
             if a is None or a.text is None:
                 continue
             if a.text.find(label_l1) != -1:
@@ -51,12 +52,14 @@ class UpdateSongs(rss.UpdateSongs):
             if l2.text.find(label_l2) != -1:
                 break
         else:
-            logger.warning(u'没有找到二级标签 label_l1 = %s label_l2 = %s', label_l1, label_l2)
+            logger.warning(u'没有找到二级标签 label_l1 = %s label_l2 = %s', label_l1,
+                           label_l2)
             return songs
 
         items = urlparse.urljoin(home, l2.get('href'))
 
-        response = self.opener.open(items, timeout=config.getint('timeout', 30))
+        response = self.opener.open(items,
+                                    timeout=config.getint('timeout', 30))
         html = etree.parse(response, etree.HTMLParser())
         for item in html.findall('//div[@id="CategoryCol_mid"]/div/ul/li/a'):
             url = urlparse.urljoin(items, item.get('href')).strip()
@@ -66,10 +69,12 @@ class UpdateSongs(rss.UpdateSongs):
             song.id = url
             song.title = item.text.strip()
             logger.debug(u'item url : %s', url)
-            response = self.opener.open(url, timeout=config.getint('timeout', 30))
+            response = self.opener.open(url,
+                                        timeout=config.getint('timeout', 30))
             html = etree.parse(response, etree.HTMLParser())
             article = html.find('//article')
-            pubDate = article.find('p[@class="post-meta"]/span[@class="post-date"]')
+            pubDate = article.find(
+                'p[@class="post-meta"]/span[@class="post-date"]')
             song.pubDate = ''.join(pubDate.itertext())
             logger.debug(u'item pubDate : %s', song.pubDate)
             for mp3 in article.findall('.//div/a'):

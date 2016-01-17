@@ -18,5 +18,4 @@ setup(name='python-doubanfm',
       package_data={'doubanfm': ['*.conf']},
       scripts=['fm'],
       license='LGPL-3+',
-      requires=['gst','lxml'],
-      )
+      requires=['gst', 'lxml'], )

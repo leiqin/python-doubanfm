@@ -9,6 +9,7 @@ from .api import Source, Song
 
 logger = logging.getLogger(__name__)
 
+
 class Douban(Source):
     '''
     豆瓣FM
@@ -47,13 +48,14 @@ class Douban(Source):
                 data = response.read()
                 response.close()
                 j = json.loads(data)
-                songs = map(self._buildSong , j['song'])
+                songs = map(self._buildSong, j['song'])
                 self.songs = songs
                 return
             except UnicodeDecodeError:
                 # 有时候 json 会有不是 utf-8 的字符
                 if response:
-                    logger.debug(u'解析歌曲列表 JSON 异常 url = %s', util.decode(response.geturl()))
+                    logger.debug(u'解析歌曲列表 JSON 异常 url = %s',
+                                 util.decode(response.geturl()))
                     logger.debug(response.headers)
                     logger.debug(data)
                 else:
@@ -61,7 +63,8 @@ class Douban(Source):
                 continue
             except Exception:
                 if response:
-                    logger.exception(u'解析歌曲列表异常 url = %s', util.decode(response.geturl()))
+                    logger.exception(u'解析歌曲列表异常 url = %s',
+                                     util.decode(response.geturl()))
                     logger.error(response.headers)
                     logger.error(data)
                 else:
@@ -70,7 +73,6 @@ class Douban(Source):
             finally:
                 if response:
                     response.close()
-            
 
     def _open(self, type='n', sid=None, channel=0, pt=None):
         params = {}
@@ -151,7 +153,6 @@ class Douban(Source):
             return []
         else:
             return self.songs[:size]
-            
 
     def _checksongs(self):
         if not self.songs:
@@ -174,7 +175,7 @@ class Douban(Source):
 
     def close(self):
         self.opener.close()
-        
+
 
 class Song(Song):
 
@@ -188,7 +189,7 @@ class Song(Song):
     tmpfile = None
     mp3source = None
 
-    def __init__(self, data = {}):
+    def __init__(self, data={}):
         self.data = data
         self.sid = self.data.get('sid')
         self.title = self.data.get('title')
@@ -224,6 +225,7 @@ class Song(Song):
 
     def oneline(self):
         return ''.join([self.title, ' <', self.artist, '>'])
+
 
 if __name__ == '__main__':
     import sys

@@ -8,6 +8,7 @@ from .api import Source, Song
 
 logger = logging.getLogger(__name__)
 
+
 class Random(Source):
     '''
     本地随机源
@@ -33,15 +34,13 @@ class Random(Source):
                         song.source = self
                         self.songs.append(song)
 
-
     def next(self):
         if not self.songs:
             return None
-        return self.songs[random.randint(0, len(self.songs)-1)]
+        return self.songs[random.randint(0, len(self.songs) - 1)]
 
 
 class Song(Song):
-
     def __init__(self, path):
         self.uri = path
         filename = os.path.basename(path)

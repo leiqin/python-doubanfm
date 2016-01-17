@@ -16,6 +16,7 @@ cachedir = os.path.expanduser(util.cachedir)
 logconf = os.path.join(configdir, 'logging.conf')
 conf = os.path.join(configdir, 'doubanfm.conf')
 
+
 def init():
     util.initDir(configdir)
     util.initDir(cachedir)
@@ -30,20 +31,23 @@ def init():
         default_conf = os.path.join(d, 'doubanfm.default.conf')
         copyfile(default_conf, conf)
 
+
 def copyfile(src, dest):
     with open(src) as s:
         with open(dest, 'w') as d:
             data = s.read()
             d.write(data)
 
+
 _global = None
+
 
 def load():
     default = {
-            'home' : os.path.expanduser('~'),
-            'configdir' : configdir,
-            'cachedir' : cachedir,
-            }
+        'home': os.path.expanduser('~'),
+        'configdir': configdir,
+        'cachedir': cachedir,
+    }
     logging.config.fileConfig(logconf, default, False)
 
     cp = ConfigParser.ConfigParser(default)
@@ -52,32 +56,39 @@ def load():
     _global = Config('global', cp)
     return cp
 
+
 def getint(key, default=None):
     if _global:
         return _global.getint(key, default)
     return default
+
 
 def getfloat(key, default=None):
     if _global:
         return _global.getfloat(key, default)
     return default
 
+
 def getboolean(key, default=None):
     if _global:
         return _global.getboolean(key, default)
     return default
+
 
 def get(key, default=None):
     if _global:
         return _global.get(key, default)
     return default
 
+
 cookiejars = {}
+
 
 def saveCookie():
     logger.debug(u'保存 Cookie')
     for cookiejar in cookiejars.values():
         cookiejar.save(ignore_discard=True, ignore_expires=True)
+
 
 def buildSources(cp):
     result = []
@@ -95,8 +106,8 @@ def buildSources(cp):
         result.append(source)
     return result
 
-class Config(object):
 
+class Config(object):
     def __init__(self, name='tmp', cp=None):
         self.name = name
         if cp is None:
@@ -187,8 +198,8 @@ class Config(object):
             cookiejar.load(ignore_discard=True, ignore_expires=True)
         return cookiejar
 
-class SaveCookie(threading.Thread):
 
+class SaveCookie(threading.Thread):
     def __init__(self, interval=3600):
         threading.Thread.__init__(self)
         self.daemon = True

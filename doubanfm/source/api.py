@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-class Source(object):
 
+class Source(object):
     def next(self):
         raise NotImplementedError
 
@@ -16,6 +16,7 @@ class Source(object):
 
     def close(self):
         pass
+
 
 class Song(object):
 

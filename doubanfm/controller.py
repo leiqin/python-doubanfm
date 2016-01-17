@@ -14,6 +14,7 @@ MAX_LIST_SIZE = 10
 MAX_WAIT_TIME = 1024
 MIN_WAIT_TIME = 2
 
+
 class Controller(object):
 
     _song = None
@@ -32,12 +33,13 @@ class Controller(object):
         self.condition = threading.Condition()
         self.source = source
         self.player = GstPlayer()
+
         def on_eos():
             if not self.condition.acquire(False):
                 return
             try:
                 if self.cycling:
-                    self.repeat();
+                    self.repeat()
                     return
 
                 # 更新 self._song.time
@@ -54,6 +56,7 @@ class Controller(object):
                 self.next()
             finally:
                 self.condition.release()
+
         self.player.on_eos = on_eos
         self.player.on_err = on_eos
 
@@ -100,7 +103,7 @@ class Controller(object):
                 song = songs.pop(0)
                 self.source.select(song)
             self.playSong(song)
-        
+
     def pause(self):
         with self.condition:
             if not self.player.playing:
@@ -195,8 +198,8 @@ class Controller(object):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     import source.api
-    class Song(source.api.Song):
 
+    class Song(source.api.Song):
         def __init__(self, file):
             self.file = file
 
@@ -205,6 +208,7 @@ if __name__ == "__main__":
 
         def oneline(self):
             return self.file
+
     p = Controller()
     f = sys.argv[1]
     seek = None

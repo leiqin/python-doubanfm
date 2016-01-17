@@ -17,14 +17,17 @@ stderr = os.path.expandvars("/tmp/python-doubanfm/$USER/stderr")
 
 EOFflag = 'EOF'
 
+
 def initParent(filepath):
     dirname = os.path.dirname(filepath)
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
 
+
 def initDir(dirname):
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
+
 
 def initFile(filepath):
     if os.path.isfile(filepath):
@@ -32,6 +35,7 @@ def initFile(filepath):
     initParent(filepath)
     with open(filepath):
         pass
+
 
 def readCmdLine(file):
     while True:
@@ -45,6 +49,7 @@ def readCmdLine(file):
         args = line.split()
         cmd = args.pop(0)
         return cmd, args
+
 
 def readReplyLine(file):
     while True:
@@ -62,6 +67,7 @@ def readReplyLine(file):
             message = args.pop(0)
         return result, message
 
+
 def readUtilEOFLine(file, EOFflag='EOF'):
     if EOFflag[-1] != '\n':
         EOFflag = EOFflag + '\n'
@@ -72,6 +78,7 @@ def readUtilEOFLine(file, EOFflag='EOF'):
             return ''.join(arr)
         arr.append(line)
 
+
 def encode(string):
     if not string:
         return string
@@ -81,6 +88,7 @@ def encode(string):
         return string.encode('utf-8')
     else:
         return encode(repr(string))
+
 
 def decode(string):
     if not string:
@@ -96,10 +104,12 @@ def inline(message):
         return message
     return message.replace('\n', ' ')
 
+
 def isInline(message):
     if not message:
         return True
     return not '\n' in message
+
 
 def showtime(second):
     h = m = s = 0
@@ -114,6 +124,7 @@ def showtime(second):
         return '%d:%02d:%02d' % (h, m, s)
     else:
         return '%02d:%02d' % (m, s)
+
 
 def resolve(name):
     """Resolve a dotted name to a global object."""
@@ -130,11 +141,12 @@ def resolve(name):
             found = getattr(found, n)
     return found
 
+
 def getSuffix(url):
     i = url.rfind('/')
     if i == -1:
         return ''
-    s = url[i+1:]
+    s = url[i + 1:]
     if not s:
         return ''
     i = s.find('?')
@@ -149,6 +161,7 @@ def getSuffix(url):
     if i == -1:
         return ''
     return s[i:]
+
 
 if __name__ == '__main__':
     print getSuffix('http://helloworld/abc.m4a?sfds=dsaf')

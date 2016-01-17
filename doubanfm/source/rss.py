@@ -10,6 +10,7 @@ from .api import Source, Song
 
 logger = logging.getLogger(__name__)
 
+
 class RSS(Source):
     '''
     配置选项：
@@ -83,7 +84,7 @@ class RSS(Source):
             return []
         if size is None:
             return list(songs)
-        elif size <=0:
+        elif size <= 0:
             return []
         else:
             return songs[:size]
@@ -170,8 +171,8 @@ class RSS(Source):
             with open(self.cur_file, 'w') as f:
                 f.write(util.encode(self.cur_id))
 
-class UpdateSongs(object):
 
+class UpdateSongs(object):
     def __init__(self, source):
         self.source = source
         self.last_id = self.source.last_id or self.source.cur_id
@@ -179,7 +180,8 @@ class UpdateSongs(object):
         self.opener = urllib2.build_opener()
         if source.proxy_enable and source.proxy:
             logger.debug(u'使用代理 %s %s' % (source.name, source.proxy))
-            self.opener.add_handler(urllib2.ProxyHandler({'http':source.proxy}))
+            self.opener.add_handler(urllib2.ProxyHandler({'http': source.proxy
+                                                          }))
 
     def __call__(self):
         if self.source.updating:
@@ -213,7 +215,8 @@ class UpdateSongs(object):
         if not suffix:
             suffix = '.mp3'
         fd, path = tempfile.mkstemp(suffix, '', self.source.cachedir)
-        response = self.opener.open(song.url, timeout=config.getint('timeout', 30))
+        response = self.opener.open(song.url,
+                                    timeout=config.getint('timeout', 30))
         while True:
             data = response.read(4096)
             if not data:
@@ -252,8 +255,8 @@ class UpdateSongs(object):
         songs.reverse()
         return songs
 
-class Song(Song):
 
+class Song(Song):
     def __init__(self):
         pass
 

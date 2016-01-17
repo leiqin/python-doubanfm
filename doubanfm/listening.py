@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 closed = False
 player = None
 
+
 def init():
     config.init()
     cp = config.load()
@@ -27,7 +28,7 @@ def init():
     else:
         cla = source.SimpleChannelSourceManager
     sources = config.buildSources(cp)
-    sm = cla(sources) 
+    sm = cla(sources)
     global player
     player = Controller(sm)
     saveCookieThread = config.SaveCookie()
@@ -59,11 +60,13 @@ def start():
             s.close()
         close()
 
+
 def close():
     if os.path.exists(socketfile):
         os.remove(socketfile)
     if player:
         player.close()
+
 
 def handler(con):
     try:
@@ -102,8 +105,8 @@ def handler(con):
     finally:
         con.close()
 
-class CmdHander(object):
 
+class CmdHander(object):
     def next(self, *args):
         index = 0
         if args:
@@ -174,6 +177,7 @@ class CmdHander(object):
         global closed
         closed = True
         player.close()
+
 
 cmdHandler = CmdHander()
 
