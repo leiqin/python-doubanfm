@@ -49,5 +49,5 @@ python 豆瓣FM 命令行客户端
 
 在 [Debian](http://www.debian.org/) 中需要执行如下命令：
 
-	sudo apt-get install gstreamer0.10-plugins-good gstreamer0.10-plugins-bad gstreamer0.10-plugins-ugly
-	sudo apt-get install python-gst0.10
+	sudo apt-get install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
+	sudo apt-get install python-gst-1.0
