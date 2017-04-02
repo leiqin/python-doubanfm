@@ -4,6 +4,7 @@
 import os
 import os.path
 import logging
+import socket
 
 logger = logging.getLogger(__name__)
 
@@ -162,6 +163,14 @@ def getSuffix(url):
         return ''
     return s[i:]
 
+def sendExitIfNeed():
+    if os.path.exists(socketfile):
+        s = socket.socket(socket.AF_UNIX)
+        s.connect(socketfile)
+        f = s.makefile('rw')
+        f.write('exit \n')
+        f.flush()
+        s.close()
 
 if __name__ == '__main__':
     print getSuffix('http://helloworld/abc.m4a?sfds=dsaf')

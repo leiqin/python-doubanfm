@@ -6,6 +6,7 @@ import os
 import os.path
 import sys
 import socket
+import logging
 
 import doubanfm.util
 from doubanfm.util import cachedir, socketfile, stdout, stderr, \
@@ -18,9 +19,9 @@ parser = argparse.ArgumentParser(description="命令行的 豆瓣FM ，\
 
 parser.add_argument('-s', '--server', action='store_true', help="启动服务")
 parser.add_argument('-d',
-                    '--daemon',
+                    '--debug',
                     action='store_true',
-                    help="daemon 模式，和 --server 一起使用")
+                    help="debug 模式，和 --server 一起使用，在前台运行 server")
 
 parser.add_argument('-p',
                     '--play',
@@ -153,7 +154,14 @@ if args.server:
     if serverHasStart():
         print '服务已经启动，如果服务并未启动请执行 rm %s' % socketfile
         sys.exit()
-    if args.daemon:
+    if args.debug:
+        initParent(stdout)
+        initParent(stderr)
+        #sys.stdout = open(stdout, 'w')
+        #sys.stderr = open(stderr, 'w')
+        import doubanfm.listening
+        doubanfm.listening.start(args.debug)
+    else:
         if not os.fork():
             initParent(stdout)
             initParent(stderr)
@@ -161,13 +169,6 @@ if args.server:
             sys.stderr = open(stderr, 'w')
             import doubanfm.listening
             doubanfm.listening.start()
-    else:
-        initParent(stdout)
-        initParent(stderr)
-        sys.stdout = open(stdout, 'w')
-        sys.stderr = open(stderr, 'w')
-        import doubanfm.listening
-        doubanfm.listening.start()
 elif args.next is not None:
     if serverHasStart():
         index = int(args.next)

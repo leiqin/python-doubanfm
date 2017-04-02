@@ -17,7 +17,7 @@ logconf = os.path.join(configdir, 'logging.conf')
 conf = os.path.join(configdir, 'doubanfm.conf')
 
 
-def init():
+def init(debug=False):
     util.initDir(configdir)
     util.initDir(cachedir)
 
@@ -42,13 +42,17 @@ def copyfile(src, dest):
 _global = None
 
 
-def load():
+def load(debug=False):
     default = {
         'home': os.path.expanduser('~'),
         'configdir': configdir,
         'cachedir': cachedir,
     }
-    logging.config.fileConfig(logconf, default, False)
+    if debug:
+        FORMAT = '%(asctime)-15s %(levelname)-5s [%(filename)s:%(lineno)d] %(message)s'
+        logging.basicConfig(format=FORMAT, level=logging.DEBUG)
+    else:
+        logging.config.fileConfig(logconf, default, False)
 
     cp = ConfigParser.ConfigParser(default)
     cp.read(conf)

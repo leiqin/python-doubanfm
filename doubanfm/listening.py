@@ -18,9 +18,9 @@ closed = False
 player = None
 
 
-def init():
-    config.init()
-    cp = config.load()
+def init(debug=False):
+    config.init(debug)
+    cp = config.load(debug)
     if cp.has_option('global', 'source_manager'):
         cla = cp.get('global', 'source_manager')
         logger.debug(cla)
@@ -35,9 +35,9 @@ def init():
     saveCookieThread.start()
 
 
-def start():
+def start(debug=False):
     try:
-        init()
+        init(debug)
     except Exception:
         logger.exception(u'初始化时发生异常')
         raise
@@ -56,6 +56,7 @@ def start():
         logger.exception(u'处理命令时发生异常')
         raise
     finally:
+        logger.info('关闭服务')
         if s:
             s.close()
         close()
